@@ -1,0 +1,427 @@
+<section class="inventory-page" aria-label="Inventory Management">
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <div>
+      <h2 class="page-title">Inventory</h2>
+      <p class="page-subtitle">Manage your perfume catalog and stock levels</p>
+    </div>
+    <button
+      pButton
+      pRipple
+      type="button"
+      label="Add Product"
+      icon="pi pi-plus"
+      class="add-btn"
+      aria-label="Add new product to inventory"
+      (click)="openAddDialog()"
+    ></button>
+  </header>
+
+  <!-- Search Bar -->
+  <div class="search-bar" role="search">
+    <div class="search-input-wrapper">
+      <i class="pi pi-search search-icon" aria-hidden="true"></i>
+      <input
+        type="search"
+        pInputText
+        class="search-input"
+        placeholder="Search products by name, brand..."
+        [value]="searchTerm()"
+        (input)="onSearch($event)"
+        aria-label="Search products"
+      />
+    </div>
+  </div>
+
+  <!-- Products Table -->
+  <div class="table-wrapper">
+    @if (isLoading()) {
+      <div class="loading-state" aria-busy="true" aria-label="Loading products">
+        @for (_ of [1, 2, 3, 4, 5]; track $index) {
+          <p-skeleton height="60px" styleClass="mb-2" />
+        }
+      </div>
+    } @else {
+      <p-table
+        #productTable
+        [value]="products()"
+        [lazy]="true"
+        [totalRecords]="totalProducts()"
+        [rows]="pageSize()"
+        [paginator]="true"
+        [rowsPerPageOptions]="[10, 25, 50]"
+        (onPage)="onPageChange($event)"
+        [sortMode]="'single'"
+        [scrollable]="true"
+        scrollHeight="calc(100vh - 380px)"
+        styleClass="p-datatable-sm"
+        [tableStyle]="{ 'min-width': '900px' }"
+        aria-label="Products inventory table"
+        role="grid"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+      >
+        <ng-template pTemplate="header">
+          <tr role="row">
+            <th scope="col" pSortableColumn="title" style="min-width: 220px" aria-sort="none">
+              Product <p-sortIcon field="title" />
+            </th>
+            <th scope="col" pSortableColumn="brand" style="min-width: 140px" aria-sort="none">
+              Brand <p-sortIcon field="brand" />
+            </th>
+            <th scope="col" style="min-width: 110px">Vibe</th>
+            <th scope="col" pSortableColumn="price" style="min-width: 110px" aria-sort="none">
+              Price <p-sortIcon field="price" />
+            </th>
+            <th scope="col" pSortableColumn="stock" style="min-width: 110px" aria-sort="none">
+              Stock <p-sortIcon field="stock" />
+            </th>
+            <th scope="col" style="min-width: 100px">Status</th>
+            <th scope="col" style="min-width: 120px; text-align: right">Actions</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-product>
+          <tr role="row" class="product-row">
+            <!-- Product Title -->
+            <td role="gridcell">
+              <div class="product-cell">
+                <div class="product-image-placeholder" aria-hidden="true">
+                  @if (product.imageUrl) {
+                    <img [src]="product.imageUrl" [alt]="product.title" class="product-thumb" />
+                  } @else {
+                    <i class="pi pi-image"></i>
+                  }
+                </div>
+                <div class="product-details">
+                  <span class="product-title-text">{{ product.title }}</span>
+                  @if (product.description) {
+                    <span class="product-desc-preview">{{ product.description | slice: 0 : 50 }}{{ (product.description?.length ?? 0) > 50 ? '...' : '' }}</span>
+                  }
+                </div>
+              </div>
+            </td>
+
+            <!-- Brand -->
+            <td role="gridcell">
+              <span class="brand-text">{{ product.brand }}</span>
+            </td>
+
+            <!-- Vibe -->
+            <td role="gridcell">
+              <p-tag
+                [value]="product.vibe"
+                [severity]="getVibeSeverity(product.vibe)"
+                [attr.aria-label]="'Vibe: ' + product.vibe"
+              />
+            </td>
+
+            <!-- Price -->
+            <td role="gridcell" class="price-cell">
+              {{ formatCurrency(product.price ?? 0) }}
+            </td>
+
+            <!-- Stock -->
+            <td role="gridcell">
+              <div class="stock-cell">
+                <span
+                  class="stock-number"
+                  [class.stock-low]="(product.stock ?? 0) < 10"
+                  [class.stock-out]="(product.stock ?? 0) === 0"
+                  [attr.aria-label]="(product.stock ?? 0) + ' units in stock'"
+                >
+                  {{ product.stock ?? 0 }}
+                </span>
+                @if ((product.stock ?? 0) < 10) {
+                  <p-tag
+                    [value]="(product.stock ?? 0) === 0 ? 'Out' : 'Low'"
+                    [severity]="getStockSeverity(product.stock ?? 0)"
+                    styleClass="stock-tag"
+                    [attr.aria-label]="(product.stock ?? 0) === 0 ? 'Out of stock' : 'Low stock warning'"
+                  />
+                }
+              </div>
+            </td>
+
+            <!-- Status -->
+            <td role="gridcell">
+              <p-tag
+                [value]="product.isActive ? 'Active' : 'Inactive'"
+                [severity]="product.isActive ? 'success' : 'danger'"
+                [attr.aria-label]="'Product is ' + (product.isActive ? 'active' : 'inactive')"
+              />
+            </td>
+
+            <!-- Actions -->
+            <td role="gridcell" class="actions-cell">
+              <div class="action-buttons" [attr.aria-label]="'Actions for ' + product.title">
+                <button
+                  pButton
+                  pRipple
+                  type="button"
+                  icon="pi pi-pencil"
+                  class="p-button-text p-button-sm edit-btn"
+                  [attr.aria-label]="'Edit ' + product.title"
+                  (click)="openEditDialog(product)"
+                ></button>
+                <button
+                  pButton
+                  pRipple
+                  type="button"
+                  icon="pi pi-trash"
+                  class="p-button-text p-button-danger p-button-sm"
+                  [attr.aria-label]="'Delete ' + product.title"
+                  (click)="confirmDelete(product, $event)"
+                ></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7">
+              <output class="empty-table">
+                <i class="pi pi-box" aria-hidden="true"></i>
+                <p>No products found. Add your first product!</p>
+                <button
+                  pButton
+                  pRipple
+                  type="button"
+                  label="Add Product"
+                  icon="pi pi-plus"
+                  class="p-button-outlined"
+                  (click)="openAddDialog()"
+                  aria-label="Add first product"
+                ></button>
+              </output>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </div>
+
+</section>
+
+<!-- Add/Edit Product Dialog -->
+<p-dialog
+  [visible]="showDialog()"
+  (visibleChange)="showDialog.set($event)"
+  [header]="editingProduct() ? 'Edit Product' : 'Add New Product'"
+  [modal]="true"
+  [style]="{ width: '680px', maxWidth: '95vw' }"
+  [draggable]="false"
+  [resizable]="false"
+  (onHide)="closeDialog()"
+  aria-label="Product form dialog"
+  [closeOnEscape]="true"
+>
+  <form [formGroup]="productForm" (ngSubmit)="saveProduct()" novalidate>
+
+    <div class="form-grid">
+
+      <!-- Title -->
+      <div class="form-field form-field--full">
+        <label for="product-title" class="form-label">
+          Product Title <span class="required-star" aria-hidden="true">*</span>
+        </label>
+        <input
+          id="product-title"
+          type="text"
+          pInputText
+          formControlName="title"
+          placeholder="e.g., Oud Rose Elixir"
+          class="w-full"
+          [class.ng-invalid]="isFieldInvalid('title')"
+          aria-required="true"
+          [attr.aria-describedby]="isFieldInvalid('title') ? 'title-error' : null"
+        />
+        @if (isFieldInvalid('title')) {
+          <small id="title-error" class="form-error" role="alert">{{ getFieldError('title') }}</small>
+        }
+      </div>
+
+      <!-- Brand -->
+      <div class="form-field">
+        <label for="product-brand" class="form-label">
+          Brand <span class="required-star" aria-hidden="true">*</span>
+        </label>
+        <input
+          id="product-brand"
+          type="text"
+          pInputText
+          formControlName="brand"
+          placeholder="e.g., Luxe Scentique"
+          class="w-full"
+          [class.ng-invalid]="isFieldInvalid('brand')"
+          aria-required="true"
+          [attr.aria-describedby]="isFieldInvalid('brand') ? 'brand-error' : null"
+        />
+        @if (isFieldInvalid('brand')) {
+          <small id="brand-error" class="form-error" role="alert">{{ getFieldError('brand') }}</small>
+        }
+      </div>
+
+      <!-- Vibe -->
+      <div class="form-field">
+        <label for="product-vibe" class="form-label">
+          Vibe / Category <span class="required-star" aria-hidden="true">*</span>
+        </label>
+        <p-dropdown
+          inputId="product-vibe"
+          formControlName="vibe"
+          [options]="vibeOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select a vibe"
+          styleClass="w-full"
+          [class.ng-invalid]="isFieldInvalid('vibe')"
+          aria-required="true"
+          [attr.aria-describedby]="isFieldInvalid('vibe') ? 'vibe-error' : null"
+        />
+        @if (isFieldInvalid('vibe')) {
+          <small id="vibe-error" class="form-error" role="alert">{{ getFieldError('vibe') }}</small>
+        }
+      </div>
+
+      <!-- Price -->
+      <div class="form-field">
+        <label for="product-price" class="form-label">
+          Price (GHS) <span class="required-star" aria-hidden="true">*</span>
+        </label>
+        <p-inputNumber
+          inputId="product-price"
+          formControlName="price"
+          mode="currency"
+          currency="GHS"
+          locale="en-GH"
+          placeholder="0.00"
+          styleClass="w-full"
+          [class.ng-invalid]="isFieldInvalid('price')"
+          aria-required="true"
+          [attr.aria-describedby]="isFieldInvalid('price') ? 'price-error' : null"
+          [min]="0.01"
+        />
+        @if (isFieldInvalid('price')) {
+          <small id="price-error" class="form-error" role="alert">{{ getFieldError('price') }}</small>
+        }
+      </div>
+
+      <!-- Stock -->
+      <div class="form-field">
+        <label for="product-stock" class="form-label">
+          Stock Quantity <span class="required-star" aria-hidden="true">*</span>
+        </label>
+        <p-inputNumber
+          inputId="product-stock"
+          formControlName="stock"
+          [min]="0"
+          [step]="1"
+          placeholder="0"
+          styleClass="w-full"
+          [showButtons]="true"
+          [class.ng-invalid]="isFieldInvalid('stock')"
+          aria-required="true"
+          [attr.aria-describedby]="isFieldInvalid('stock') ? 'stock-error' : null"
+        />
+        @if (isFieldInvalid('stock')) {
+          <small id="stock-error" class="form-error" role="alert">{{ getFieldError('stock') }}</small>
+        }
+      </div>
+
+      <!-- Description -->
+      <div class="form-field form-field--full">
+        <label for="product-description" class="form-label">
+          Description <span class="required-star" aria-hidden="true">*</span>
+        </label>
+        <textarea
+          id="product-description"
+          pInputTextarea
+          formControlName="description"
+          [rows]="4"
+          placeholder="Describe the fragrance notes, character, and experience..."
+          class="w-full"
+          [class.ng-invalid]="isFieldInvalid('description')"
+          aria-required="true"
+          [attr.aria-describedby]="isFieldInvalid('description') ? 'description-error' : null"
+          [autoResize]="true"
+        ></textarea>
+        @if (isFieldInvalid('description')) {
+          <small id="description-error" class="form-error" role="alert">{{ getFieldError('description') }}</small>
+        }
+      </div>
+
+      <!-- Image Upload -->
+      <div class="form-field form-field--full">
+        <label for="product-image" class="form-label">Product Image</label>
+        <div class="image-upload-area">
+          <input
+            id="product-image"
+            type="file"
+            accept="image/*"
+            class="image-input"
+            (change)="onImageSelect($event)"
+            aria-label="Upload product image (max 5MB)"
+          />
+          @if (selectedImageFile()) {
+            <output class="selected-file">
+              <i class="pi pi-check-circle" aria-hidden="true"></i>
+              {{ selectedImageFile()!.name }}
+            </output>
+          } @else {
+            <span class="upload-hint">
+              <i class="pi pi-upload" aria-hidden="true"></i>
+              Click to upload or drag & drop (Max 5MB, JPG/PNG/WebP)
+            </span>
+          }
+        </div>
+      </div>
+
+      <!-- Active Toggle -->
+      <div class="form-field form-field--full">
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <label for="product-active" class="form-label toggle-label">Product Status</label>
+            <span class="toggle-hint">Active products are visible in the store</span>
+          </div>
+          <p-inputSwitch
+            inputId="product-active"
+            formControlName="isActive"
+            [attr.aria-label]="'Toggle product active status: ' + (productForm.get('isActive')?.value ? 'currently active' : 'currently inactive')"
+          />
+        </div>
+      </div>
+
+    </div>
+
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <button
+        pButton
+        pRipple
+        type="button"
+        label="Cancel"
+        icon="pi pi-times"
+        class="p-button-outlined"
+        (click)="closeDialog()"
+        aria-label="Cancel and close dialog"
+      ></button>
+      <button
+        pButton
+        pRipple
+        type="button"
+        [label]="editingProduct() ? 'Update Product' : 'Add Product'"
+        icon="pi pi-check"
+        [loading]="isSubmitting()"
+        [disabled]="productForm.invalid || isSubmitting()"
+        (click)="saveProduct()"
+        [attr.aria-label]="(editingProduct() ? 'Update' : 'Save') + ' product'"
+        aria-live="polite"
+      ></button>
+    </div>
+  </ng-template>
+</p-dialog>

@@ -1,0 +1,114 @@
+<p-toast position="top-right" [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" />
+<p-confirmDialog />
+
+<div class="admin-layout" [class.sidebar-open]="isSidebarOpen()" [class.sidebar-closed]="!isSidebarOpen()">
+
+  <!-- Sidebar Overlay (mobile) -->
+  @if (isMobile() && isSidebarOpen()) {
+    <div
+      class="sidebar-overlay"
+      (click)="toggleSidebar()"
+      aria-label="Close sidebar"
+      (keydown.enter)="toggleSidebar()"
+      (keydown.space)="toggleSidebar()"
+    ></div>
+  }
+
+  <!-- Sidebar -->
+  <aside
+    class="sidebar"
+    [class.open]="isSidebarOpen()"
+    aria-label="Main navigation"
+  >
+    <!-- Brand Header -->
+    <div class="sidebar-brand">
+      <div class="brand-logo" aria-hidden="true">
+        <span class="brand-icon">LS</span>
+      </div>
+      @if (isSidebarOpen()) {
+        <div class="brand-text">
+          <span class="brand-name">Luxe Scentique</span>
+          <span class="brand-subtitle">Admin Panel</span>
+        </div>
+      }
+    </div>
+
+    <!-- Navigation Items -->
+    <nav class="sidebar-nav" aria-label="Admin navigation links">
+      <ul class="nav-list">
+        @for (item of navItems; track item.route) {
+          <li>
+            <a
+              [routerLink]="item.route"
+              routerLinkActive="active"
+              [ariaCurrentWhenActive]="'page'"
+              class="nav-item"
+              [attr.aria-label]="item.ariaLabel"
+              pRipple
+              (click)="closeSidebarOnMobile()"
+              (keydown.enter)="closeSidebarOnMobile()"
+            >
+              <i [class]="item.icon" class="nav-icon" aria-hidden="true"></i>
+              @if (isSidebarOpen()) {
+                <span class="nav-label">{{ item.label }}</span>
+              }
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    @if (isSidebarOpen()) {
+      <div class="sidebar-footer">
+        <div class="sidebar-version">v1.0.0</div>
+      </div>
+    }
+  </aside>
+
+  <!-- Main Content Wrapper -->
+  <div class="main-wrapper">
+
+    <!-- Top Header Bar -->
+    <header class="top-header" role="banner">
+      <div class="header-left">
+        <button
+          class="sidebar-toggle"
+          (click)="toggleSidebar()"
+          [attr.aria-expanded]="isSidebarOpen()"
+          aria-controls="sidebar"
+          aria-label="Toggle sidebar navigation"
+          type="button"
+        >
+          <i class="pi pi-bars" aria-hidden="true"></i>
+        </button>
+        <h1 class="header-title">Luxe Scentique Admin</h1>
+      </div>
+
+      <div class="header-right">
+        <!-- User Avatar -->
+        <div class="user-avatar" aria-label="Admin user avatar">
+          <i class="pi pi-user" aria-hidden="true"></i>
+        </div>
+
+        <!-- Logout Button -->
+        <button
+          class="logout-btn"
+          type="button"
+          (click)="logout()"
+          aria-label="Sign out of admin panel"
+          title="Logout"
+          pRipple
+        >
+          <i class="pi pi-sign-out" aria-hidden="true"></i>
+          <span class="logout-label">Logout</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="main-content" role="main" id="main-content" tabindex="-1">
+      <ng-content />
+    </main>
+  </div>
+</div>

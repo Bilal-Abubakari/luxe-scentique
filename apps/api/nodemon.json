@@ -1,0 +1,6 @@
+{
+  "watch": ["apps/api/src", "libs/shared-types/src"],
+  "ext": "ts,json",
+  "ignore": ["**/*.spec.ts", "**/*.test.ts", "node_modules"],
+  "exec": "ts-node --project apps/api/tsconfig.app.json -r tsconfig-paths/register apps/api/src/main.ts"
+}

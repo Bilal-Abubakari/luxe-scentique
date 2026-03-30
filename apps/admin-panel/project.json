@@ -1,0 +1,53 @@
+{
+  "name": "admin-panel",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/admin-panel/src",
+  "prefix": "app",
+  "tags": ["scope:admin", "type:app"],
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/admin-panel",
+        "index": "apps/admin-panel/src/index.html",
+        "browser": "apps/admin-panel/src/main.ts",
+        "polyfills": ["zone.js"],
+        "tsConfig": "apps/admin-panel/tsconfig.app.json",
+        "assets": ["apps/admin-panel/src/favicon.ico", "apps/admin-panel/src/assets"],
+        "styles": ["apps/admin-panel/src/styles.scss"],
+        "scripts": [],
+        "allowedCommonJsDependencies": ["chart.js"]
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {"type": "initial", "maximumWarning": "500kb", "maximumError": "1mb"},
+            {"type": "anyComponentStyle", "maximumWarning": "2kb", "maximumError": "4kb"}
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "configurations": {
+        "production": {"buildTarget": "admin-panel:build:production"},
+        "development": {"buildTarget": "admin-panel:build:development"}
+      },
+      "defaultConfiguration": "development",
+      "options": { "port": 4201 }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {"lintFilePatterns": ["apps/admin-panel/**/*.ts", "apps/admin-panel/**/*.html"]}
+    }
+  }
+}

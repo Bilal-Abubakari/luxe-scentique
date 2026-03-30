@@ -1,0 +1,383 @@
+// ============================================================
+// Layout Variables
+// ============================================================
+$sidebar-width: 260px;
+$sidebar-collapsed-width: 72px;
+$header-height: 64px;
+$transition-speed: 0.3s;
+
+// ============================================================
+// Root Layout Grid
+// ============================================================
+.admin-layout {
+  display: grid;
+  grid-template-columns: $sidebar-width 1fr;
+  grid-template-rows: 1fr;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--color-onyx);
+  transition: grid-template-columns $transition-speed ease;
+
+  &.sidebar-closed {
+    grid-template-columns: $sidebar-collapsed-width 1fr;
+  }
+
+  @media (max-width: 767px) {
+    grid-template-columns: 0 1fr;
+
+    &.sidebar-open {
+      grid-template-columns: 0 1fr;
+    }
+  }
+}
+
+// ============================================================
+// Sidebar Overlay (Mobile)
+// ============================================================
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 99;
+  backdrop-filter: blur(2px);
+  cursor: pointer;
+}
+
+// ============================================================
+// Sidebar
+// ============================================================
+.sidebar {
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  overflow: hidden;
+  position: relative;
+  z-index: 100;
+  transition: width $transition-speed ease;
+  width: $sidebar-collapsed-width;
+
+  &.open {
+    width: $sidebar-width;
+
+    @media (max-width: 767px) {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: $sidebar-width;
+      z-index: 100;
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  @media (max-width: 767px) {
+    position: fixed;
+    top: 0;
+    left: -$sidebar-width;
+    height: 100vh;
+    z-index: 100;
+    transition: left $transition-speed ease, width $transition-speed ease;
+    width: $sidebar-width;
+
+    &.open {
+      left: 0;
+    }
+  }
+}
+
+// ============================================================
+// Sidebar Brand
+// ============================================================
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  min-height: $header-height;
+  overflow: hidden;
+
+  .brand-logo {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .brand-icon {
+    color: var(--color-onyx);
+    font-weight: 800;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+  }
+
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .brand-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--color-gold);
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+  }
+
+  .brand-subtitle {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+  }
+}
+
+// ============================================================
+// Sidebar Navigation
+// ============================================================
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1rem 0;
+
+  &::-webkit-scrollbar {
+    width: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 55, 0.2);
+    border-radius: 2px;
+  }
+}
+
+.nav-list {
+  list-style: none;
+  padding: 0 0.5rem;
+  margin: 0;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 0.25rem;
+
+  &:hover {
+    color: var(--color-text-primary);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+  }
+
+  &.active {
+    color: var(--color-gold);
+    background: rgba(212, 175, 55, 0.12);
+    border-left: 3px solid var(--color-gold);
+    padding-left: calc(1rem - 3px);
+
+    .nav-icon {
+      color: var(--color-gold);
+    }
+  }
+
+  .nav-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+    transition: color 0.2s;
+  }
+
+  .nav-label {
+    font-weight: 500;
+  }
+}
+
+// ============================================================
+// Sidebar Footer
+// ============================================================
+.sidebar-footer {
+  padding: 1rem;
+  border-top: 1px solid var(--color-border);
+
+  .sidebar-version {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+}
+
+// ============================================================
+// Main Wrapper
+// ============================================================
+.main-wrapper {
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0; // Prevent grid blowout
+
+  @media (max-width: 767px) {
+    grid-column: 1 / -1; // Full width on mobile
+  }
+}
+
+// ============================================================
+// Top Header
+// ============================================================
+.top-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  height: $header-height;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+  gap: 1rem;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 0;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+}
+
+.header-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-gold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+  }
+}
+
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background: rgba(212, 175, 55, 0.1);
+    border-color: var(--color-gold);
+    color: var(--color-gold);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+  }
+
+  i {
+    font-size: 1rem;
+  }
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-gold);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+
+  &:hover {
+    background: #2a1414;
+    border-color: rgba(231, 76, 60, 0.4);
+    color: #ff7a6a;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+  }
+
+  .logout-label {
+    @media (max-width: 480px) {
+      display: none;
+    }
+  }
+}
+
+// ============================================================
+// Main Content Area
+// ============================================================
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.5rem;
+  background: var(--color-onyx);
+
+  @media (max-width: 480px) {
+    padding: 1rem;
+  }
+}

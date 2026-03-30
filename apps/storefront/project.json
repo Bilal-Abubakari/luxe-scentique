@@ -1,0 +1,36 @@
+{
+  "name": "storefront",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/storefront",
+  "projectType": "application",
+  "tags": ["scope:storefront", "type:app"],
+  "targets": {
+    "build": {
+      "executor": "@nx/next:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/apps/storefront"
+      },
+      "configurations": {
+        "development": { "outputPath": "dist/apps/storefront" },
+        "production": {}
+      }
+    },
+    "dev": {
+      "executor": "@nx/next:server",
+      "defaultConfiguration": "development",
+      "options": { "buildTarget": "storefront:build", "dev": true,
+        "port": 5000
+      },
+      "configurations": {
+        "development": { "buildTarget": "storefront:build:development", "dev": true },
+        "production": { "buildTarget": "storefront:build:production", "dev": false }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": { "lintFilePatterns": ["apps/storefront/**/*.{ts,tsx}"] }
+    }
+  }
+}

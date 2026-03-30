@@ -1,0 +1,194 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --gold: #D4AF37;
+    --gold-light: #E8C84A;
+    --gold-dark: #B8962E;
+    --onyx: #0F0F0F;
+    --onyx-light: #1a1a1a;
+    --cream: #FAF7F2;
+    --cream-dark: #F2EAD9;
+    --radius: 0.5rem;
+
+    /* Semantic tokens */
+    --background: var(--cream);
+    --foreground: var(--onyx);
+    --primary: var(--gold);
+    --primary-foreground: var(--onyx);
+    --border: rgba(212, 175, 55, 0.2);
+    --ring: var(--gold);
+  }
+
+  * {
+    border-color: var(--border);
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-cream text-onyx font-body;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+    line-height: 1.2;
+  }
+
+  ::selection {
+    background-color: rgba(212, 175, 55, 0.3);
+    color: #0F0F0F;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+@layer components {
+  .btn-gold {
+    @apply bg-gold text-onyx font-medium px-6 py-3 rounded transition-all duration-300;
+    @apply hover:shadow-gold-md;
+    @apply focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2;
+  }
+  .btn-gold:hover {
+    background-color: #B8962E;
+  }
+
+  .btn-outline-gold {
+    @apply border border-gold text-gold font-medium px-6 py-3 rounded transition-all duration-300;
+    @apply hover:bg-gold hover:text-onyx;
+    @apply focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2;
+  }
+
+  .card-luxury {
+    @apply bg-white rounded-lg overflow-hidden transition-all duration-300;
+    border: 1px solid #e8e8e8;
+  }
+  .card-luxury:hover {
+    @apply border-gold shadow-gold-md;
+  }
+
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #D4AF37 0%, #E8C84A 50%, #B8962E 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .skeleton {
+    @apply rounded animate-pulse;
+    background: linear-gradient(
+      90deg,
+      #e8e8e8 25%,
+      #f0f0f0 50%,
+      #e8e8e8 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .input-luxury {
+    @apply w-full px-4 py-3 bg-white rounded-md text-onyx transition-colors duration-200;
+    @apply focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold;
+    border: 1px solid #d1d1d1;
+    color: #0F0F0F;
+  }
+  .input-luxury::placeholder {
+    color: #737373;
+  }
+
+  .label-luxury {
+    @apply text-sm font-medium mb-1 block;
+    color: #3d3d3d;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .container-luxury {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-padding {
+    @apply py-16 md:py-24;
+  }
+
+  .gold-border-bottom {
+    border-bottom: 2px solid var(--gold);
+  }
+
+  .gold-underline {
+    position: relative;
+  }
+
+  .gold-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+
+  .gold-underline:hover::after,
+  .gold-underline[data-active='true']::after {
+    transform: scaleX(1);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cream);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.4);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.7);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 175, 55, 0.4) var(--cream);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Transition defaults */
+a,
+button,
+input,
+select,
+textarea {
+  transition-property: color, background-color, border-color, opacity, box-shadow, transform;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}

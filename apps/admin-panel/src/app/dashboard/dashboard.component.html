@@ -1,0 +1,224 @@
+<section class="dashboard-page" aria-label="Admin Dashboard">
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <div>
+      <h2 class="page-title">Dashboard</h2>
+      <p class="page-subtitle">Welcome back — here's what's happening today.</p>
+    </div>
+    <time class="page-date" [attr.datetime]="today.toISOString()">
+      {{ today | date: 'EEEE, MMMM d, y' }}
+    </time>
+  </header>
+
+  <!-- Stat Cards -->
+  <div class="stats-grid" aria-label="Key metrics">
+
+    @if (isLoading()) {
+      @for (_ of [1, 2, 3, 4]; track $index) {
+        <div class="stat-card skeleton-card" aria-busy="true" aria-label="Loading metric">
+          <p-skeleton height="80px" styleClass="skeleton-inner" />
+        </div>
+      }
+    } @else if (stats()) {
+
+      <!-- Today's Sales -->
+      <div class="stat-card" aria-label="Today's sales in Ghana Cedis">
+        <div class="stat-icon stat-icon--gold" aria-hidden="true">
+          <i class="pi pi-wallet"></i>
+        </div>
+        <div class="stat-body">
+          <span class="stat-label">Today's Sales</span>
+          <span class="stat-value">{{ formatCurrency(stats()!.todaySales) }}</span>
+        </div>
+        <div class="stat-badge" aria-hidden="true">
+          <i class="pi pi-arrow-up text-success"></i>
+        </div>
+      </div>
+
+      <!-- Total Orders -->
+      <div class="stat-card" aria-label="Total orders count">
+        <div class="stat-icon stat-icon--blue" aria-hidden="true">
+          <i class="pi pi-shopping-bag"></i>
+        </div>
+        <div class="stat-body">
+          <span class="stat-label">Total Orders</span>
+          <span class="stat-value">{{ stats()!.totalSales | number }}</span>
+        </div>
+      </div>
+
+      <!-- Pending Orders -->
+      <div class="stat-card" [class.stat-card--warning]="stats()!.pendingOrders > 0"
+           aria-label="Pending orders requiring attention">
+        <div class="stat-icon stat-icon--warning" aria-hidden="true">
+          <i class="pi pi-clock"></i>
+        </div>
+        <div class="stat-body">
+          <span class="stat-label">Pending Orders</span>
+          <span class="stat-value">{{ stats()!.pendingOrders | number }}</span>
+        </div>
+        @if (stats()!.pendingOrders > 0) {
+          <div class="stat-alert" role="alert" aria-live="polite">
+            <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+          </div>
+        }
+      </div>
+
+      <!-- Products in Stock -->
+      <div class="stat-card" aria-label="Total products in inventory">
+        <div class="stat-icon stat-icon--purple" aria-hidden="true">
+          <i class="pi pi-box"></i>
+        </div>
+        <div class="stat-body">
+          <span class="stat-label">Products in Stock</span>
+          <span class="stat-value">{{ stats()!.totalProducts | number }}</span>
+          @if (stats()!.lowStockProducts > 0) {
+            <output class="stat-sub">
+              <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+              {{ stats()!.lowStockProducts }} low stock
+            </output>
+          }
+        </div>
+      </div>
+
+    }
+  </div>
+
+  <!-- Charts + Low Stock Section -->
+  <div class="content-grid">
+
+    <!-- Orders by Status Chart -->
+    <section class="chart-card" aria-labelledby="chart-title">
+      <header class="section-header">
+        <h3 class="section-title" id="chart-title">Orders by Status</h3>
+        <p class="section-subtitle">Distribution across all order statuses</p>
+      </header>
+
+      @if (isLoading()) {
+        <div class="chart-skeleton" aria-busy="true" aria-label="Loading chart">
+          <p-skeleton height="280px" />
+        </div>
+      } @else if (chartData()) {
+        <div class="chart-container" aria-label="Bar chart showing order distribution by status">
+          <p-chart
+            type="bar"
+            [data]="chartData()!"
+            [options]="chartOptions()"
+            height="280"
+          />
+        </div>
+
+        <!-- Chart Legend -->
+        <div class="chart-legend" aria-label="Chart legend">
+          @for (label of chartData()!.labels; track label; let i = $index) {
+            <div class="legend-item">
+              <span
+                class="legend-dot"
+                [style.background]="chartData()!.datasets[0].backgroundColor[i]"
+                aria-hidden="true"
+              ></span>
+              <span>{{ label }}</span>
+              <strong>{{ chartData()!.datasets[0].data[i] }}</strong>
+            </div>
+          }
+        </div>
+      } @else {
+        <output class="empty-state">
+          <i class="pi pi-chart-bar" aria-hidden="true"></i>
+          <p>No order data available</p>
+        </output>
+      }
+    </section>
+
+    <!-- Low Stock Alerts -->
+    <section class="low-stock-card" aria-labelledby="low-stock-title">
+      <header class="section-header">
+        <h3 class="section-title" id="low-stock-title">
+          <i class="pi pi-exclamation-triangle section-title-icon" aria-hidden="true"></i>
+          Low Stock Alerts
+        </h3>
+        <p class="section-subtitle">Products with fewer than 10 units</p>
+      </header>
+
+      @if (isLoading()) {
+        <div aria-busy="true" aria-label="Loading low stock alerts">
+          @for (_ of [1, 2, 3, 4]; track $index) {
+            <p-skeleton height="52px" styleClass="mb-2" />
+          }
+        </div>
+      } @else if (lowStockProducts().length > 0) {
+        <ul class="low-stock-list" aria-label="Low stock product alerts">
+          @for (product of lowStockProducts(); track product.id) {
+            <li class="low-stock-item">
+              <div class="product-info">
+                <span class="product-name">{{ product.title }}</span>
+                <span class="product-brand">{{ product.brand }}</span>
+              </div>
+              <p-tag
+                [value]="product.stock === 0 ? 'Out of Stock' : product.stock + ' left'"
+                [severity]="getStockSeverity(product.stock)"
+                [attr.aria-label]="product.title + ': ' + product.stock + ' units remaining'"
+              />
+            </li>
+          }
+        </ul>
+      } @else {
+        <output class="empty-state">
+          <i class="pi pi-check-circle icon--success" aria-hidden="true"></i>
+          <p>All products are well stocked</p>
+        </output>
+      }
+    </section>
+  </div>
+
+  <!-- Recent Orders -->
+  <section class="recent-orders-card" aria-labelledby="recent-orders-title">
+    <header class="section-header">
+      <h3 class="section-title" id="recent-orders-title">Recent Orders</h3>
+      <a routerLink="/orders" class="view-all-link" aria-label="View all orders">
+        View all <i class="pi pi-arrow-right" aria-hidden="true"></i>
+      </a>
+    </header>
+
+    @if (isLoading()) {
+      <p-skeleton height="200px" />
+    } @else if (recentOrders().length > 0) {
+      <div class="orders-table-wrapper" aria-label="Recent orders table">
+        <table class="orders-table" aria-label="Recent orders">
+          <thead>
+            <tr>
+              <th scope="col">Order #</th>
+              <th scope="col">Customer</th>
+              <th scope="col">Date</th>
+              <th scope="col">Total</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (order of recentOrders(); track order.id) {
+              <tr>
+                <td class="order-number" aria-label="Order number">{{ order.orderNumber }}</td>
+                <td aria-label="Customer name">{{ order.customerName ?? 'Walk-in' }}</td>
+                <td aria-label="Order date">{{ order.createdAt | date: 'MMM d, y' }}</td>
+                <td class="order-total" aria-label="Order total">{{ formatCurrency(order.total) }}</td>
+                <td>
+                  <p-tag
+                    [value]="order.status"
+                    [severity]="getStatusSeverity(order.status)"
+                    [attr.aria-label]="'Order status: ' + order.status"
+                  />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <output class="empty-state">
+        <i class="pi pi-shopping-bag" aria-hidden="true"></i>
+        <span>No recent orders found</span>
+      </output>
+    }
+  </section>
+
+</section>

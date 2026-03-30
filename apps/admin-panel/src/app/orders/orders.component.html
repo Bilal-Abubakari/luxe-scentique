@@ -1,0 +1,370 @@
+<section class="orders-page" aria-label="Orders Management">
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <div>
+      <h2 class="page-title">Orders</h2>
+      <p class="page-subtitle">Track and manage all customer orders</p>
+    </div>
+    <div class="header-actions">
+      <output class="orders-count">
+        {{ totalOrders() | number }} total orders
+      </output>
+    </div>
+  </header>
+
+  <!-- Filters Row -->
+  <div class="filters-row" role="search" aria-label="Order filters">
+
+    <!-- Search -->
+    <div class="search-input-wrapper">
+      <i class="pi pi-search search-icon" aria-hidden="true"></i>
+      <input
+        type="search"
+        pInputText
+        class="search-input"
+        placeholder="Search by order # or customer..."
+        [value]="searchTerm()"
+        (input)="onSearch($event)"
+        aria-label="Search orders"
+      />
+    </div>
+
+    <!-- Status Filter -->
+    <p-dropdown
+      [options]="statusFilterOptions"
+      [ngModel]="selectedStatus()"
+      (ngModelChange)="onStatusFilterChange($event)"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Filter by status"
+      styleClass="status-filter"
+      aria-label="Filter orders by status"
+    />
+
+  </div>
+
+  <!-- Orders Table -->
+  <div class="table-wrapper">
+    @if (isLoading()) {
+      <div class="loading-state" aria-busy="true" aria-label="Loading orders">
+        @for (_ of [1, 2, 3, 4, 5, 6]; track $index) {
+          <p-skeleton height="60px" styleClass="mb-2" />
+        }
+      </div>
+    } @else {
+      <p-table
+        [value]="orders()"
+        [lazy]="true"
+        [totalRecords]="totalOrders()"
+        [rows]="pageSize()"
+        [paginator]="true"
+        [rowsPerPageOptions]="[15, 30, 50]"
+        (onPage)="onPageChange($event)"
+        [scrollable]="true"
+        scrollHeight="calc(100vh - 360px)"
+        styleClass="p-datatable-sm orders-table"
+        [tableStyle]="{ 'min-width': '900px' }"
+        aria-label="Orders table"
+        role="grid"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} orders"
+      >
+        <ng-template pTemplate="header">
+          <tr role="row">
+            <th scope="col" style="min-width: 130px">Order #</th>
+            <th scope="col" style="min-width: 160px">Customer</th>
+            <th scope="col" style="min-width: 130px">Date</th>
+            <th scope="col" style="min-width: 120px">Payment</th>
+            <th scope="col" style="min-width: 120px">Total</th>
+            <th scope="col" style="min-width: 130px">Status</th>
+            <th scope="col" style="min-width: 200px">Update Status</th>
+            <th scope="col" style="min-width: 80px; text-align: center">Details</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-order>
+          <tr role="row" class="order-row">
+
+            <!-- Order Number -->
+            <td role="gridcell">
+              <span class="order-number" [attr.aria-label]="'Order number: ' + (order.orderNumber ?? order.id.slice(-8))">
+                #{{ order.orderNumber ?? order.id.slice(-8) ?? 'N/A' }}
+              </span>
+            </td>
+
+            <!-- Customer -->
+            <td role="gridcell">
+              <div class="customer-cell">
+                <span class="customer-name">{{ order.customerName ?? 'Walk-in Customer' }}</span>
+                @if (order.customerEmail) {
+                  <span class="customer-email">{{ order.customerEmail }}</span>
+                }
+              </div>
+            </td>
+
+            <!-- Date -->
+            <td role="gridcell" class="date-cell">
+              <span [attr.aria-label]="'Order date: ' + (order.createdAt | date: 'MMMM d, y')">
+                {{ order.createdAt | date: 'MMM d, y' }}
+              </span>
+              <span class="order-time">{{ order.createdAt | date: 'h:mm a' }}</span>
+            </td>
+
+            <!-- Payment Method -->
+            <td role="gridcell">
+              <p-tag
+                [value]="order.paymentMethod"
+                [severity]="getPaymentSeverity(order.paymentMethod)"
+                [attr.aria-label]="'Payment method: ' + order.paymentMethod"
+              />
+            </td>
+
+            <!-- Total -->
+            <td role="gridcell" class="total-cell">
+              {{ formatCurrency(order.total) }}
+            </td>
+
+            <!-- Status Badge -->
+            <td role="gridcell">
+              <p-tag
+                [value]="order.status"
+                [severity]="getStatusSeverity(order.status)"
+                [attr.aria-label]="'Current status: ' + order.status"
+              />
+            </td>
+
+            <!-- Status Update -->
+            <td role="gridcell">
+              @if (getNextStatuses(order.status).length > 0) {
+                <p-dropdown
+                  [options]="getNextStatuses(order.status)"
+                  optionLabel="label"
+                  optionValue="value"
+                  [placeholder]="isUpdating() === order.id ? 'Updating...' : 'Move to...'"
+                  styleClass="status-update-dropdown"
+                  [disabled]="isUpdating() === order.id"
+                  (onChange)="updateOrderStatus(order, $event.value)"
+                  [attr.aria-label]="'Update status for order #' + (order.orderNumber ?? '')"
+                  [ngModel]="null"
+                />
+              } @else {
+                <output class="status-final">
+                  @if (order.status === 'DELIVERED') {
+                    <i class="pi pi-check-circle" aria-hidden="true" style="color: var(--color-success);"></i>
+                    Complete
+                  } @else if (order.status === 'CANCELLED') {
+                    <i class="pi pi-times-circle" aria-hidden="true" style="color: var(--color-danger);"></i>
+                    Cancelled
+                  }
+                </output>
+              }
+            </td>
+
+            <!-- View Details -->
+            <td role="gridcell" class="details-cell">
+              <button
+                pButton
+                pRipple
+                type="button"
+                icon="pi pi-eye"
+                class="p-button-text p-button-sm details-btn"
+                (click)="openOrderDetail(order)"
+                [attr.aria-label]="'View details for order #' + (order.orderNumber ?? order.id.slice(-8))"
+              ></button>
+            </td>
+
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="8">
+              <output class="empty-table">
+                <i class="pi pi-shopping-bag" aria-hidden="true"></i>
+                <p>No orders found matching your filters.</p>
+              </output>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </div>
+
+</section>
+
+<!-- Order Detail Dialog -->
+@if (selectedOrder(); as order) {
+  <p-dialog
+    [visible]="showDetailDialog()"
+    (visibleChange)="showDetailDialog.set($event)"
+    [header]="'Order #' + order.orderNumber"
+    [modal]="true"
+    [style]="{ width: '600px', maxWidth: '95vw' }"
+    [draggable]="false"
+    [resizable]="false"
+    (onHide)="closeOrderDetail()"
+    [closeOnEscape]="true"
+    [attr.aria-label]="'Order details for #' + order.orderNumber"
+  >
+
+    <div class="order-detail">
+
+      <!-- Status + Date Row -->
+      <div class="detail-meta">
+        <div class="meta-item">
+          <span class="meta-label">Status</span>
+          <p-tag
+            [value]="order.status"
+            [severity]="getStatusSeverity(order.status)"
+          />
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Date</span>
+          <span class="meta-value">{{ order.createdAt | date: 'MMM d, y · h:mm a' }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Payment</span>
+          <p-tag
+            [value]="order.paymentMethod"
+            [severity]="getPaymentSeverity(order.paymentMethod)"
+          />
+        </div>
+      </div>
+
+      <p-divider />
+
+      <!-- Customer Information -->
+      <section aria-labelledby="customer-section-title">
+        <h4 class="detail-section-title" id="customer-section-title">
+          <i class="pi pi-user" aria-hidden="true"></i>
+          Customer Information
+        </h4>
+        <div class="customer-info-grid">
+          @if (order.customerName) {
+            <div class="info-field">
+              <span class="info-label">Name</span>
+              <span class="info-value">{{ order.customerName }}</span>
+            </div>
+          }
+          @if (order.customerEmail) {
+            <div class="info-field">
+              <span class="info-label">Email</span>
+              <span class="info-value">{{ order.customerEmail }}</span>
+            </div>
+          }
+          @if (order.customerPhone) {
+            <div class="info-field">
+              <span class="info-label">Phone</span>
+              <span class="info-value">{{ order.customerPhone }}</span>
+            </div>
+          }
+          @if (!order.customerName && !order.customerEmail) {
+            <span class="meta-value">Walk-in customer (no contact details)</span>
+          }
+        </div>
+      </section>
+
+      <p-divider />
+
+      <!-- Order Items -->
+      <section aria-labelledby="items-section-title">
+        <h4 class="detail-section-title" id="items-section-title">
+          <i class="pi pi-list" aria-hidden="true"></i>
+          Order Items
+        </h4>
+
+        @if (order.items && order.items.length > 0) {
+          <ul class="order-items-list" aria-label="Items in this order">
+            @for (item of order.items; track $index) {
+              <li class="order-item">
+                <div class="item-info">
+                  <span class="item-name">{{ item.productTitle }}</span>
+                  <span class="item-meta">
+                    {{ formatCurrency(item.price) }} × {{ item.quantity }}
+                  </span>
+                </div>
+                <span class="item-total">
+                  {{ formatCurrency(item.price * item.quantity) }}
+                </span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="meta-value">No item details available</p>
+        }
+      </section>
+
+      <p-divider />
+
+      <!-- Totals -->
+      <section class="order-totals" aria-label="Order pricing breakdown">
+        <div class="total-row">
+          <span class="total-label">Subtotal</span>
+          <span class="total-amount">{{ formatCurrency(getOrderSubtotal(order)) }}</span>
+        </div>
+        @if (getServiceFee(order) > 0) {
+          <div class="total-row">
+            <span class="total-label">Service Fee</span>
+            <span class="total-amount">{{ formatCurrency(getServiceFee(order)) }}</span>
+          </div>
+        }
+        <div class="total-row total-row--grand">
+          <span class="total-label">Total</span>
+          <span class="total-amount total-amount--grand">{{ formatCurrency(order.total) }}</span>
+        </div>
+      </section>
+
+      @if (order.notes) {
+        <p-divider />
+        <section aria-labelledby="notes-section-title">
+          <h4 class="detail-section-title" id="notes-section-title">
+            <i class="pi pi-comment" aria-hidden="true"></i>
+            Notes
+          </h4>
+          <p class="order-notes">{{ order.notes }}</p>
+        </section>
+      }
+
+      <!-- Status Update from Detail Dialog -->
+      @if (getNextStatuses(order.status).length > 0) {
+        <p-divider />
+        <section aria-labelledby="update-status-title">
+          <h4 class="detail-section-title" id="update-status-title">
+            <i class="pi pi-refresh" aria-hidden="true"></i>
+            Update Status
+          </h4>
+          <div class="status-update-row" [attr.aria-label]="'Update order status from ' + order.status">
+            @for (statusOption of getNextStatuses(order.status); track statusOption.value) {
+              <button
+                pButton
+                pRipple
+                type="button"
+                [label]="'Mark as ' + statusOption.label"
+                [class]="statusOption.value === 'CANCELLED' ? 'p-button-outlined p-button-danger' : 'p-button-outlined'"
+                [loading]="isUpdating() === order.id"
+                [disabled]="isUpdating() === order.id"
+                (click)="updateOrderStatus(order, statusOption.value)"
+                [attr.aria-label]="'Update order status to ' + statusOption.label"
+              ></button>
+            }
+          </div>
+        </section>
+      }
+
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        pRipple
+        type="button"
+        label="Close"
+        icon="pi pi-times"
+        class="p-button-outlined"
+        (click)="closeOrderDetail()"
+        aria-label="Close order details dialog"
+      ></button>
+    </ng-template>
+  </p-dialog>
+}

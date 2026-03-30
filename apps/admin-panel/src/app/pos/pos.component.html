@@ -1,0 +1,393 @@
+<section class="pos-page" aria-label="Point of Sale">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div>
+      <h2 class="page-title">
+        <i class="pi pi-credit-card" aria-hidden="true"></i>
+        Point of Sale
+      </h2>
+      <p class="page-subtitle">Process walk-in customer purchases</p>
+    </div>
+
+    @if (cartItems().length > 0) {
+      <output class="cart-summary-badge" aria-label="Cart summary">
+        <i class="pi pi-shopping-cart" aria-hidden="true"></i>
+        {{ getItemCount() }} item{{ getItemCount() !== 1 ? 's' : '' }} &bull;
+        {{ formatCurrency(getCartTotal()) }}
+      </output>
+    }
+  </header>
+
+  <!-- Success Banner -->
+  @if (completedOrderNumber()) {
+    <div class="success-banner" role="alert" aria-live="assertive">
+      <div class="success-content">
+        <i class="pi pi-check-circle" aria-hidden="true"></i>
+        <div>
+          <strong>Sale Completed!</strong>
+          <span>Order #{{ completedOrderNumber() }} has been created successfully.</span>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="success-dismiss"
+        (click)="completedOrderNumber.set(null)"
+        aria-label="Dismiss success message"
+      >
+        <i class="pi pi-times" aria-hidden="true"></i>
+      </button>
+    </div>
+  }
+
+  <!-- Main POS Layout -->
+  <div class="pos-layout">
+    <!-- Left Panel: Product Search + Customer Form -->
+    <div class="pos-left">
+      <!-- Product Search Card -->
+      <section class="pos-card" aria-labelledby="search-section-title">
+        <h3 class="card-title" id="search-section-title">
+          <i class="pi pi-search" aria-hidden="true"></i>
+          Find Product
+        </h3>
+
+        <div class="search-section">
+          <p-autoComplete
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+            [suggestions]="searchResults()"
+            (completeMethod)="onSearchProducts($event)"
+            (onSelect)="onProductSelect($event.value)"
+            optionLabel="title"
+            [minLength]="2"
+            [delay]="300"
+            placeholder="Search perfumes by name or brand..."
+            styleClass="product-search-ac"
+            [forceSelection]="false"
+            [showClear]="true"
+            inputId="product-search"
+            aria-label="Search for products to add to cart"
+            [attr.aria-busy]="isSearching()"
+          >
+            <ng-template let-product pTemplate="item">
+              <option class="search-result-item">
+                <div class="result-info">
+                  <span class="result-title">{{ product.title }}</span>
+                  <span class="result-brand">{{ product.brand }}</span>
+                </div>
+                <div class="result-right">
+                  <span class="result-price">{{ formatCurrency(product.price) }}</span>
+                  <p-tag
+                    [value]="'Stock: ' + product.stock"
+                    [severity]="product.stock < 5 ? 'warning' : 'success'"
+                    styleClass="result-stock-tag"
+                  />
+                </div>
+              </option>
+            </ng-template>
+          </p-autoComplete>
+        </div>
+
+        <!-- Selected Product Preview -->
+        @if (selectedProduct(); as product) {
+          <section class="selected-product-preview" aria-label="Selected product details">
+            <div class="preview-info">
+              <div class="preview-image" aria-hidden="true">
+                @if (product.images[0]) {
+                  <img [src]="product.images[0]" [alt]="product.title" />
+                } @else {
+                  <i class="pi pi-image"></i>
+                }
+              </div>
+              <div class="preview-details">
+                <span class="preview-title">{{ product.title }}</span>
+                <span class="preview-brand">{{ product.brand }}</span>
+                <div class="preview-tags">
+                  @if (product.vibe) {
+                    <p-tag [value]="product.vibe" [severity]="getVibeSeverity(product.vibe)" />
+                  }
+                  <span class="preview-stock" [class.stock-warn]="product.stock < 10">
+                    {{ product.stock }} in stock
+                  </span>
+                </div>
+              </div>
+              <div class="preview-price" aria-label="Price per unit">
+                {{ formatCurrency(product.price) }}
+              </div>
+            </div>
+
+            <div class="add-to-cart-row">
+              <label for="add-qty" class="qty-label">Quantity:</label>
+              <p-inputNumber
+                inputId="add-qty"
+                [ngModel]="addQuantity()"
+                (ngModelChange)="addQuantity.set($event)"
+                [min]="1"
+                [max]="product.stock"
+                [showButtons]="true"
+                styleClass="qty-input"
+                [allowEmpty]="false"
+                aria-label="Quantity to add to cart"
+                decrementButtonIcon="pi pi-minus"
+                incrementButtonIcon="pi pi-plus"
+              />
+              <button
+                pButton
+                pRipple
+                type="button"
+                label="Add to Cart"
+                icon="pi pi-cart-plus"
+                class="add-cart-btn"
+                (click)="addToCart()"
+                [disabled]="product.stock === 0"
+                aria-label="Add selected product to cart"
+              ></button>
+            </div>
+          </section>
+        }
+      </section>
+
+      <!-- Customer Information Card -->
+      <section class="pos-card" aria-labelledby="customer-section-title">
+        <h3 class="card-title" id="customer-section-title">
+          <i class="pi pi-user" aria-hidden="true"></i>
+          Customer Information
+        </h3>
+
+        <form [formGroup]="customerForm" novalidate>
+          <div class="customer-form-grid">
+            <!-- Customer Name -->
+            <div class="form-field form-field--full">
+              <label for="customer-name" class="form-label">
+                Full Name <span class="required-star" aria-hidden="true">*</span>
+              </label>
+              <input
+                id="customer-name"
+                type="text"
+                pInputText
+                formControlName="customerName"
+                placeholder="e.g., Kwame Mensah"
+                class="w-full"
+                [class.ng-invalid]="isFieldInvalid('customerName')"
+                aria-required="true"
+                [attr.aria-describedby]="isFieldInvalid('customerName') ? 'name-error' : null"
+              />
+              @if (isFieldInvalid('customerName')) {
+                <small id="name-error" class="form-error" role="alert">
+                  Please enter the customer's name.
+                </small>
+              }
+            </div>
+
+            <!-- Email -->
+            <div class="form-field">
+              <label for="customer-email" class="form-label">Email (Optional)</label>
+              <input
+                id="customer-email"
+                type="email"
+                pInputText
+                formControlName="customerEmail"
+                placeholder="customer@example.com"
+                class="w-full"
+                [class.ng-invalid]="isFieldInvalid('customerEmail')"
+                aria-required="false"
+                [attr.aria-describedby]="isFieldInvalid('customerEmail') ? 'email-error' : null"
+              />
+              @if (isFieldInvalid('customerEmail')) {
+                <small id="email-error" class="form-error" role="alert">
+                  Please enter a valid email address.
+                </small>
+              }
+            </div>
+
+            <!-- Phone -->
+            <div class="form-field">
+              <label for="customer-phone" class="form-label">Phone (Optional)</label>
+              <input
+                id="customer-phone"
+                type="tel"
+                pInputText
+                formControlName="customerPhone"
+                placeholder="e.g., +233 55 123 4567"
+                class="w-full"
+                [class.ng-invalid]="isFieldInvalid('customerPhone')"
+                aria-required="false"
+                [attr.aria-describedby]="isFieldInvalid('customerPhone') ? 'phone-error' : null"
+              />
+              @if (isFieldInvalid('customerPhone')) {
+                <small id="phone-error" class="form-error" role="alert">
+                  Please enter a valid phone number.
+                </small>
+              }
+            </div>
+
+            <!-- Notes -->
+            <div class="form-field form-field--full">
+              <label for="sale-notes" class="form-label">Notes (Optional)</label>
+              <textarea
+                id="sale-notes"
+                pInputTextarea
+                formControlName="notes"
+                [rows]="3"
+                placeholder="Any special requests or notes for this order..."
+                class="w-full"
+                [autoResize]="true"
+                aria-required="false"
+              ></textarea>
+            </div>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <!-- Right Panel: Cart + Summary -->
+    <div class="pos-right">
+      <section class="cart-card" aria-labelledby="cart-section-title">
+        <div class="cart-header">
+          <h3 class="card-title" id="cart-section-title">
+            <i class="pi pi-shopping-cart" aria-hidden="true"></i>
+            Cart
+            @if (cartItems().length > 0) {
+              <span class="cart-count-badge" [attr.aria-label]="cartItems().length + ' items'">
+                {{ cartItems().length }}
+              </span>
+            }
+          </h3>
+          @if (cartItems().length > 0) {
+            <button
+              type="button"
+              class="clear-cart-btn"
+              (click)="clearCart()"
+              aria-label="Clear all items from cart"
+            >
+              <i class="pi pi-trash" aria-hidden="true"></i>
+              Clear All
+            </button>
+          }
+        </div>
+
+        <!-- Cart Items -->
+        @if (cartItems().length === 0) {
+          <output class="cart-empty">
+            <i class="pi pi-shopping-cart" aria-hidden="true"></i>
+            <p>Your cart is empty</p>
+            <span>Search for products and add them to the cart</span>
+          </output>
+        } @else {
+          <ul class="cart-items-list" aria-label="Cart items">
+            @for (item of cartItems(); track item.product.id; let i = $index) {
+              <li class="cart-item">
+                <div class="cart-item-info">
+                  <div class="cart-item-image" aria-hidden="true">
+                    @if (item.product.images[0]) {
+                      <img [src]="item.product.images[0]" [alt]="item.product.title" />
+                    } @else {
+                      <i class="pi pi-image"></i>
+                    }
+                  </div>
+                  <div class="cart-item-details">
+                    <span class="cart-item-name">{{ item.product.title }}</span>
+                    <span class="cart-item-brand">{{ item.product.brand }}</span>
+                    <span class="cart-item-unit-price">
+                      {{ formatCurrency(item.product.price) }} each
+                    </span>
+                  </div>
+                </div>
+
+                <div class="cart-item-controls">
+                  <fieldset class="qty-controls">
+                    <legend class="sr-only">{{ 'Quantity for ' + item.product.title }}</legend>
+                    <button
+                      type="button"
+                      class="qty-btn"
+                      (click)="updateItemQuantity(i, item.quantity - 1)"
+                      [attr.aria-label]="'Decrease quantity of ' + item.product.title"
+                      [disabled]="item.quantity <= 1"
+                    >
+                      <i class="pi pi-minus" aria-hidden="true"></i>
+                    </button>
+                    <span class="qty-display" [attr.aria-label]="item.quantity + ' units'">
+                      {{ item.quantity }}
+                    </span>
+                    <button
+                      type="button"
+                      class="qty-btn"
+                      (click)="updateItemQuantity(i, item.quantity + 1)"
+                      [attr.aria-label]="'Increase quantity of ' + item.product.title"
+                      [disabled]="item.quantity >= item.product.stock"
+                    >
+                      <i class="pi pi-plus" aria-hidden="true"></i>
+                    </button>
+                  </fieldset>
+
+                  <span
+                    class="cart-item-total"
+                    [attr.aria-label]="'Line total: ' + formatCurrency(item.lineTotal)"
+                  >
+                    {{ formatCurrency(item.lineTotal) }}
+                  </span>
+
+                  <button
+                    type="button"
+                    class="remove-item-btn"
+                    (click)="removeFromCart(i)"
+                    [attr.aria-label]="'Remove ' + item.product.title + ' from cart'"
+                  >
+                    <i class="pi pi-times" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </li>
+            }
+          </ul>
+
+          <!-- Order Summary -->
+          <section class="order-summary" aria-label="Order pricing summary">
+            <p-divider />
+
+            <div class="summary-row">
+              <span class="summary-label">Subtotal ({{ getItemCount() }} items)</span>
+              <span class="summary-amount">{{ formatCurrency(getCartSubtotal()) }}</span>
+            </div>
+            <div class="summary-row summary-note">
+              <span class="summary-label">
+                <i class="pi pi-info-circle" aria-hidden="true"></i>
+                Service Fee
+              </span>
+              <span class="summary-amount free-badge">FREE (Walk-in)</span>
+            </div>
+
+            <p-divider />
+
+            <div class="summary-row summary-total">
+              <span class="summary-label-total">Total</span>
+              <span
+                class="summary-amount-total"
+                [attr.aria-label]="'Total amount: ' + formatCurrency(getCartTotal())"
+              >
+                {{ formatCurrency(getCartTotal()) }}
+              </span>
+            </div>
+          </section>
+
+          <!-- Complete Sale Button -->
+          <button
+            pButton
+            pRipple
+            type="button"
+            class="complete-sale-btn"
+            [loading]="isSubmitting()"
+            [disabled]="isSubmitting() || cartItems().length === 0"
+            (click)="completeSale()"
+            [attr.aria-busy]="isSubmitting()"
+          >
+            @if (!isSubmitting()) {
+              <i class="pi pi-check-circle" aria-hidden="true"></i>
+              <span>Complete Sale &bull; {{ formatCurrency(getCartTotal()) }}</span>
+            } @else {
+              <span>Processing...</span>
+            }
+          </button>
+        }
+      </section>
+    </div>
+  </div>
+</section>
