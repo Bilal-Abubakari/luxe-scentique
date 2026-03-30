@@ -21,7 +21,6 @@
       "ESNext"
     ],
     "types": [
-      "next-env",
       "node"
     ],
     "noEmit": true,
@@ -32,7 +31,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "../../libs/shared-types/src/**/*.ts"
+    "../../libs/shared-types/src/**/*.ts",
+    "../../dist/apps/storefront/.next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
