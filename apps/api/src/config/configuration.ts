@@ -38,7 +38,13 @@ export const configuration = () => ({
   },
 
   superAdmin: {
-    email: process.env['SUPER_ADMIN_EMAIL'] ?? 'abubakaribilal99@gmail.com',
+    emails: (
+      process.env['SUPER_ADMIN_EMAILS'] ??
+      'abubakaribilal99@gmail.com,bawahuda22@gmail.com'
+    )
+      .split(',')
+      .map((e) => e.trim())
+      .filter(Boolean),
   },
 });
 

@@ -58,23 +58,19 @@ import { AuthService } from '../core/services/auth.service';
         margin-bottom: 2rem;
       }
 
-      .brand-monogram {
+      .brand-logo-wrapper {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 72px;
-        height: 72px;
-        background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
-        border-radius: 18px;
+        width: 96px;
+        height: 96px;
         margin-bottom: 1.25rem;
-        box-shadow: 0 8px 24px rgba(212, 175, 55, 0.3);
       }
 
-      .monogram-text {
-        color: var(--color-onyx);
-        font-size: 1.5rem;
-        font-weight: 800;
-        letter-spacing: 0.05em;
+      .brand-logo-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
       }
 
       .brand-title {

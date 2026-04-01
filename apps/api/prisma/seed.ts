@@ -3,17 +3,30 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main(): Promise<void> {
-  // Seed Super Admin
-  const superAdmin = await prisma.user.upsert({
-    where: { email: process.env['SUPER_ADMIN_EMAIL'] ?? 'abubakaribilal99@gmail.com' },
-    update: { role: 'SUPER_ADMIN' },
-    create: {
+  // Seed Super Admins
+  const superAdmins = [
+    {
       email: process.env['SUPER_ADMIN_EMAIL'] ?? 'abubakaribilal99@gmail.com',
       name: 'Bilal Abubakari',
-      role: 'SUPER_ADMIN',
     },
-  });
-  console.log(`Super admin seeded: ${superAdmin.email}`);
+    {
+      email: process.env['SUPER_ADMIN_EMAIL_2'] ?? 'bawahuda22@gmail.com',
+      name: 'Bawa Huda',
+    },
+  ];
+
+  for (const admin of superAdmins) {
+    const superAdmin = await prisma.user.upsert({
+      where: { email: admin.email },
+      update: { role: 'SUPER_ADMIN' },
+      create: {
+        email: admin.email,
+        name: admin.name,
+        role: 'SUPER_ADMIN',
+      },
+    });
+    console.log(`Super admin seeded: ${superAdmin.email}`);
+  }
 
   // Seed Sample Products
   const products = [

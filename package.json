@@ -18,9 +18,10 @@
     "test": "nx run-many -t test",
     "lint": "nx run-many -t lint",
     "prisma:generate": "prisma generate --schema=apps/api/prisma/schema.prisma",
-    "prisma:push": "prisma db push --schema=apps/api/prisma/schema.prisma",
     "prisma:migrate:dev": "prisma migrate dev --schema=apps/api/prisma/schema.prisma",
     "prisma:migrate:deploy": "prisma migrate deploy --schema=apps/api/prisma/schema.prisma",
+    "prisma:migrate:status": "prisma migrate status --schema=apps/api/prisma/schema.prisma",
+    "prisma:migrate:reset": "prisma migrate reset --schema=apps/api/prisma/schema.prisma",
     "prisma:studio": "prisma studio --schema=apps/api/prisma/schema.prisma",
     "prisma:seed": "ts-node -r dotenv/config apps/api/prisma/seed.ts"
   },

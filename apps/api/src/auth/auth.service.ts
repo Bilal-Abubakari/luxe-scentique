@@ -27,7 +27,7 @@ export class AuthService {
   ) {}
 
   async findOrCreateGoogleUser(input: GoogleUserInput): Promise<IUser> {
-    const superAdminEmail = this.configService.get<string>('superAdmin.email');
+    const superAdminEmails = this.configService.get<string[]>('superAdmin.emails') ?? [];
 
     // Check if user exists by googleId or email
     let user = await this.prisma.user.findFirst({
@@ -37,16 +37,19 @@ export class AuthService {
     });
 
     if (user) {
-      // Update Google ID if missing
-      if (!user.googleId) {
-        user = await this.prisma.user.update({
-          where: { id: user.id },
-          data: { googleId: input.googleId, avatar: input.avatar },
-        });
-      }
+      // Update Google ID if missing; also ensure super-admin role is applied if seeded
+      const isSuperAdmin = superAdminEmails.includes(user.email);
+      user = await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          ...(!user.googleId && { googleId: input.googleId }),
+          ...(input.avatar && { avatar: input.avatar }),
+          ...(isSuperAdmin && user.role !== Role.SUPER_ADMIN && { role: Role.SUPER_ADMIN }),
+        },
+      });
     } else {
-      // Create new user; seed super-admin role for designated email
-      const role: Role = input.email === superAdminEmail ? Role.SUPER_ADMIN : Role.CUSTOMER;
+      // Create new user; assign super-admin role for designated emails
+      const role: Role = superAdminEmails.includes(input.email) ? Role.SUPER_ADMIN : Role.CUSTOMER;
       user = await this.prisma.user.create({
         data: {
           email: input.email,

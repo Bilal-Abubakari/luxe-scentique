@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 const SHOP_LINKS = [
   { href: '/shop', label: 'All Fragrances' },
@@ -31,10 +32,16 @@ export function Footer() {
           <div className="lg:col-span-1">
             <Link
               href="/"
-              className="inline-block mb-4 focus-visible:ring-2 focus-visible:ring-gold rounded"
+              className="inline-block mb-6 focus-visible:ring-2 focus-visible:ring-gold rounded"
               aria-label="Luxe Scentique homepage"
             >
-              <span className="font-display text-2xl text-gold">Luxe Scentique</span>
+              <Image
+                src="/images/logo.png"
+                alt="Luxe Scentique"
+                width={160}
+                height={48}
+                className="h-12 w-auto object-contain opacity-90 hover:opacity-100 transition-opacity"
+              />
             </Link>
             <p className="text-onyx-300 text-sm leading-relaxed mb-6">
               The Classic Sophisticate. We curate the world&apos;s finest fragrances for those

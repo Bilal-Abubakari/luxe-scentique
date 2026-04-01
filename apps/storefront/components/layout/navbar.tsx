@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { getToken, removeToken } from '../../lib/auth';
 import { cn } from '../../lib/utils';
@@ -75,12 +76,17 @@ export function Navbar() {
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 group focus-visible:ring-2 focus-visible:ring-gold rounded"
+            className="flex items-center group focus-visible:ring-2 focus-visible:ring-gold rounded"
             aria-label="Luxe Scentique — Go to homepage"
           >
-            <span className="font-display text-xl md:text-2xl text-gold tracking-wide group-hover:text-gold-300 transition-colors">
-              Luxe Scentique
-            </span>
+            <Image
+              src="/images/logo.png"
+              alt="Luxe Scentique"
+              width={160}
+              height={48}
+              className="h-10 w-auto object-contain transition-opacity group-hover:opacity-90"
+              priority
+            />
           </Link>
 
           {/* Desktop Navigation */}
