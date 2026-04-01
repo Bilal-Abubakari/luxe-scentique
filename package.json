@@ -17,6 +17,7 @@
     "build:api": "nx build api --configuration=production",
     "build:storefront": "nx build storefront --configuration=production",
     "build:admin": "nx build admin-panel --configuration=production",
+    "build:admin:staging": "nx build admin-panel --configuration=staging",
     "test": "nx run-many -t test",
     "lint": "nx run-many -t lint",
     "prisma:generate": "prisma generate --schema=apps/api/prisma/schema.prisma",
