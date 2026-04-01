@@ -62,8 +62,8 @@ import { AuthService } from '../core/services/auth.service';
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 96px;
-        height: 96px;
+        width: 200px;
+        height: 200px;
         margin-bottom: 1.25rem;
       }
 

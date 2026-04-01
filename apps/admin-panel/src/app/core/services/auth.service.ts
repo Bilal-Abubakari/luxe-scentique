@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 const TOKEN_KEY = 'luxe_token';
-const API_BASE = 'http://localhost:3003/api/v1';
+const API_BASE = environment.apiBase;
 
 @Injectable({
   providedIn: 'root',

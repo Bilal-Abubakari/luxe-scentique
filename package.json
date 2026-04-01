@@ -6,7 +6,7 @@
   "scripts": {
     "postinstall": "prisma generate --schema=apps/api/prisma/schema.prisma",
     "start:prod": "prisma migrate deploy --schema=apps/api/prisma/schema.prisma && node dist/apps/api/main.js",
-    "dev": "nx run-many -t serve --projects=api,admin-panel --parallel",
+    "dev": "nx run-many -t serve --projects=api,admin-panel,storefront --parallel",
     "dev:api": "nodemon --config apps/api/nodemon.json",
     "dev:storefront": "nx dev storefront",
     "dev:admin": "nx serve admin-panel --configuration=development",

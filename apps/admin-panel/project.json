@@ -15,7 +15,16 @@
         "browser": "apps/admin-panel/src/main.ts",
         "polyfills": ["zone.js"],
         "tsConfig": "apps/admin-panel/tsconfig.app.json",
-        "assets": ["apps/admin-panel/src/favicon.ico", "apps/admin-panel/src/assets"],
+        "assets": [
+          "apps/admin-panel/src/favicon.ico",
+          "apps/admin-panel/src/favicon-16x16.png",
+          "apps/admin-panel/src/favicon-32x32.png",
+          "apps/admin-panel/src/apple-touch-icon.png",
+          "apps/admin-panel/src/android-chrome-192x192.png",
+          "apps/admin-panel/src/android-chrome-512x512.png",
+          "apps/admin-panel/src/site.webmanifest",
+          "apps/admin-panel/src/assets"
+        ],
         "styles": ["apps/admin-panel/src/styles.scss"],
         "scripts": [],
         "allowedCommonJsDependencies": ["chart.js"]
@@ -26,7 +35,21 @@
             {"type": "initial", "maximumWarning": "500kb", "maximumError": "1mb"},
             {"type": "anyComponentStyle", "maximumWarning": "5kb", "maximumError": "10kb"}
           ],
-          "outputHashing": "all"
+          "outputHashing": "all",
+          "fileReplacements": [
+            {
+              "replace": "apps/admin-panel/src/environments/environment.ts",
+              "with": "apps/admin-panel/src/environments/environment.prod.ts"
+            }
+          ]
+        },
+        "staging": {
+          "fileReplacements": [
+            {
+              "replace": "apps/admin-panel/src/environments/environment.ts",
+              "with": "apps/admin-panel/src/environments/environment.staging.ts"
+            }
+          ]
         },
         "development": {
           "optimization": false,
@@ -40,6 +63,7 @@
       "executor": "@angular-devkit/build-angular:dev-server",
       "configurations": {
         "production": {"buildTarget": "admin-panel:build:production"},
+        "staging": {"buildTarget": "admin-panel:build:staging"},
         "development": {"buildTarget": "admin-panel:build:development"}
       },
       "defaultConfiguration": "development",

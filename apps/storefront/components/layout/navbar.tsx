@@ -82,9 +82,9 @@ export function Navbar() {
             <Image
               src="/images/logo.png"
               alt="Luxe Scentique"
-              width={160}
-              height={48}
-              className="h-10 w-auto object-contain transition-opacity group-hover:opacity-90"
+              width={200}
+              height={200}
+              className="h-20 w-30 object-contain transition-opacity group-hover:opacity-90"
               priority
             />
           </Link>

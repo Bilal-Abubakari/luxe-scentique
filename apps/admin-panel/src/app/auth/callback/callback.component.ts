@@ -38,7 +38,6 @@ export class AuthCallbackComponent implements OnInit {
   private readonly authService = inject(AuthService);
 
   ngOnInit(): void {
-    console.log("Hey there")
     const token = this.route.snapshot.queryParamMap.get('token');
 
     if (token) {
