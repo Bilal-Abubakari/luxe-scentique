@@ -4,6 +4,8 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "postinstall": "prisma generate --schema=apps/api/prisma/schema.prisma",
+    "start:prod": "prisma migrate deploy --schema=apps/api/prisma/schema.prisma && node dist/apps/api/main.js",
     "dev": "nx run-many -t serve --projects=api,admin-panel --parallel",
     "dev:api": "nodemon --config apps/api/nodemon.json",
     "dev:storefront": "nx dev storefront",

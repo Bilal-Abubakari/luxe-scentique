@@ -1,0 +1,29 @@
+# Dependencies (reinstalled inside Docker)
+node_modules
+.npm
+# Build outputs
+dist
+.next
+# NX cache
+.nx/cache
+.nx/workspace-data
+# Development env files (inject via secrets/env vars in production)
+.env
+.env.local
+.env.*.local
+# Logs
+*.log
+npm-debug.log*
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+# Git
+.git
+.gitignore
+# Test & coverage
+coverage
+**/*.spec.ts
+# Angular-specific
+.angular
