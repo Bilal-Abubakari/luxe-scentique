@@ -23,6 +23,7 @@ RUN npx nx build api --configuration=production
 FROM node:24-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+RUN apk add --no-cache openssl
 # Copy the bundled app
 COPY --from=builder /app/dist/apps/api ./dist/apps/api
 # Copy node_modules (includes the generated .prisma/client binaries)
