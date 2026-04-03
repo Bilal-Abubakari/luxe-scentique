@@ -12,6 +12,7 @@ import {
   HttpStatus,
   UseInterceptors,
   UploadedFiles,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -35,6 +36,7 @@ import {
   ProductVibe,
   CreateProductDto,
   UpdateProductDto,
+  ProductQueryDto,
 } from '@luxe-scentique/shared-types';
 
 @ApiTags('products')
@@ -57,9 +59,10 @@ export class ProductsController {
     @Body() dto: CreateProductDto,
     @UploadedFiles() files?: Express.Multer.File[],
   ): Promise<IPerfume> {
-    const images = files?.length
-      ? await Promise.all(files.map((f) => this.storageService.upload(f)))
-      : [];
+    if (!files?.length) {
+      throw new BadRequestException('At least one product image is required.');
+    }
+    const images = await Promise.all(files.map((f) => this.storageService.upload(f)));
     return this.productsService.create({ ...dto, images });
   }
 
@@ -74,17 +77,8 @@ export class ProductsController {
   @ApiQuery({ name: 'brand', required: false, type: String })
   @ApiQuery({ name: 'inStock', required: false, type: Boolean })
   @ApiQuery({ name: 'search', required: false, type: String })
-  findAll(@Query() query: Record<string, string>): Promise<IPerfumePaginated> {
-    return this.productsService.findAll({
-      page: query['page'] ? Number.parseInt(query['page'], 10) : undefined,
-      limit: query['limit'] ? Number.parseInt(query['limit'], 10) : undefined,
-      vibe: query['vibe'] as ProductVibe | undefined,
-      minPrice: query['minPrice'] ? Number.parseFloat(query['minPrice']) : undefined,
-      maxPrice: query['maxPrice'] ? Number.parseFloat(query['maxPrice']) : undefined,
-      brand: query['brand'],
-      inStock: query['inStock'] === 'true',
-      search: query['search'],
-    });
+  findAll(@Query() query: ProductQueryDto): Promise<IPerfumePaginated> {
+    return this.productsService.findAll(query);
   }
 
   @Get(':id')

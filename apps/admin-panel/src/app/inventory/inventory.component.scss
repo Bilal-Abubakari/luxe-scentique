@@ -220,6 +220,7 @@
 // Dialog Form Styles
 // ============================================================
 .form-grid {
+  margin-top: 1rem;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.25rem;
@@ -283,6 +284,10 @@
   &:focus-within {
     border-color: var(--color-gold);
     box-shadow: 0 0 0 1px var(--color-gold);
+  }
+
+  &.upload-area--error {
+    border-color: var(--p-red-500, #ef4444);
   }
 }
 

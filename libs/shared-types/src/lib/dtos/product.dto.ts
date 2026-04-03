@@ -1,38 +1,163 @@
+import {
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsNumber,
+  IsInt,
+  IsBoolean,
+  IsArray,
+  IsUrl,
+  Min,
+  MinLength,
+  ValidateNested,
+  IsPositive,
+  ArrayMinSize,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 import { ProductVibe } from '../enums';
-import { IPerfumeNotes } from '../interfaces/perfume.interface';
 
-export interface CreateProductDto {
-  title: string;
-  brand: string;
+export class PerfumeNotesDto {
+  @IsArray()
+  @IsString({ each: true })
+  top!: string[];
+
+  @IsArray()
+  @IsString({ each: true })
+  middle!: string[];
+
+  @IsArray()
+  @IsString({ each: true })
+  base!: string[];
+}
+
+export class CreateProductDto {
+  @IsString()
+  @MinLength(2)
+  title!: string;
+
+  @IsString()
+  @MinLength(2)
+  brand!: string;
+
+  @IsOptional()
+  @IsEnum(ProductVibe)
   vibe?: ProductVibe;
+
+  @IsOptional()
+  @IsString()
   description?: string;
-  notes?: IPerfumeNotes;
-  price: number;
-  stock: number;
-  images?: string[];
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => PerfumeNotesDto)
+  notes?: PerfumeNotesDto;
+
+  @IsNumber()
+  @IsPositive()
+  price!: number;
+
+  @IsInt()
+  @Min(0)
+  stock!: number;
+
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsUrl({}, { each: true })
+  images!: string[];
+
+  @IsOptional()
+  @IsBoolean()
   isActive?: boolean;
 }
 
-export interface UpdateProductDto {
+export class UpdateProductDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
   title?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
   brand?: string;
+
+  @IsOptional()
+  @IsEnum(ProductVibe)
   vibe?: ProductVibe;
+
+  @IsOptional()
+  @IsString()
   description?: string;
-  notes?: IPerfumeNotes;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => PerfumeNotesDto)
+  notes?: PerfumeNotesDto;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
   price?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
   stock?: number;
+
+  @IsOptional()
+  @IsArray()
+  @IsUrl({}, { each: true })
   images?: string[];
+
+  @IsOptional()
+  @IsBoolean()
   isActive?: boolean;
 }
 
-export interface ProductQueryDto {
+export class ProductQueryDto {
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  @Type(() => Number)
   page?: number;
+
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  @Type(() => Number)
   limit?: number;
+
+  @IsOptional()
+  @IsEnum(ProductVibe)
   vibe?: ProductVibe;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
   minPrice?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
   maxPrice?: number;
+
+  @IsOptional()
+  @IsString()
   brand?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
   inStock?: boolean;
+
+  @IsOptional()
+  @IsString()
   search?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
   isActive?: boolean;
 }

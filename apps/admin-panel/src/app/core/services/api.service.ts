@@ -10,6 +10,7 @@ import type {
   UpdateProductDto,
   CreateWalkInOrderDto,
 } from '@luxe-scentique/shared-types';
+import { environment } from '../../../environments/environment';
 
 type UnknownKeys = string | number | boolean | undefined;
 
@@ -42,7 +43,7 @@ export interface ProductQueryParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-const API_BASE = 'http://localhost:3000/api/v1';
+const API_BASE = environment.apiBase;
 
 @Injectable({
   providedIn: 'root',
@@ -60,8 +61,15 @@ export class ApiService {
     });
   }
 
-  createProduct(dto: CreateProductDto): Observable<IPerfume> {
-    return this.http.post<IPerfume>(`${API_BASE}/products`, dto);
+  createProduct(dto: Omit<CreateProductDto, 'images'>, imageFiles: File[]): Observable<IPerfume> {
+    const formData = new FormData();
+    (Object.entries(dto) as [string, string][]).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
+      }
+    });
+    imageFiles.forEach((file) => formData.append('images', file));
+    return this.http.post<IPerfume>(`${API_BASE}/products`, formData);
   }
 
   updateProduct(id: string, dto: UpdateProductDto): Observable<IPerfume> {
@@ -70,15 +78,6 @@ export class ApiService {
 
   deleteProduct(id: string): Observable<void> {
     return this.http.delete<void>(`${API_BASE}/products/${id}`);
-  }
-
-  uploadProductImage(productId: string, file: File): Observable<{ imageUrl: string }> {
-    const formData = new FormData();
-    formData.append('image', file);
-    return this.http.post<{ imageUrl: string }>(
-      `${API_BASE}/products/${productId}/image`,
-      formData
-    );
   }
 
   // ============================================================

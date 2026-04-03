@@ -17,7 +17,7 @@ import { BadgeModule } from 'primeng/badge';
 import { RippleModule } from 'primeng/ripple';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ApiService } from '../core/services/api.service';
-import type { IPerfume, CreateProductDto, UpdateProductDto } from '@luxe-scentique/shared-types';
+import type { IPerfume, UpdateProductDto } from '@luxe-scentique/shared-types';
 
 interface VibeOption {
   label: string;
@@ -63,6 +63,7 @@ export class InventoryComponent implements OnInit {
   showDialog = signal(false);
   editingProduct = signal<IPerfume | null>(null);
   selectedImageFile = signal<File | null>(null);
+  imageSubmitAttempted = signal(false);
 
   currentPage = signal(0);
   pageSize = signal(10);
@@ -138,6 +139,7 @@ export class InventoryComponent implements OnInit {
     this.editingProduct.set(null);
     this.productForm.reset({ isActive: true, stock: 0 });
     this.selectedImageFile.set(null);
+    this.imageSubmitAttempted.set(false);
     this.showDialog.set(true);
   }
 
@@ -160,6 +162,7 @@ export class InventoryComponent implements OnInit {
     this.showDialog.set(false);
     this.editingProduct.set(null);
     this.productForm.reset({ isActive: true, stock: 0 });
+    this.imageSubmitAttempted.set(false);
   }
 
   onImageSelect(event: Event): void {
@@ -183,6 +186,7 @@ export class InventoryComponent implements OnInit {
         return;
       }
       this.selectedImageFile.set(file);
+      this.imageSubmitAttempted.set(false);
     }
   }
 
@@ -192,35 +196,24 @@ export class InventoryComponent implements OnInit {
       return;
     }
 
-    this.isSubmitting.set(true);
-    const formValue = this.productForm.value as CreateProductDto;
     const editing = this.editingProduct();
+    const imageFile = this.selectedImageFile();
+
+    if (!editing && !imageFile) {
+      this.imageSubmitAttempted.set(true);
+      return;
+    }
+
+    this.isSubmitting.set(true);
+    const formValue = this.productForm.value;
 
     const request = editing
       ? this.apiService.updateProduct(editing.id, formValue as UpdateProductDto)
-      : this.apiService.createProduct(formValue);
+      : this.apiService.createProduct(formValue, [imageFile!]);
 
     request.subscribe({
-      next: (savedProduct) => {
-        const imageFile = this.selectedImageFile();
-        if (imageFile && savedProduct.id) {
-          this.apiService.uploadProductImage(savedProduct.id, imageFile).subscribe({
-            next: () => {
-              this.onSaveSuccess(editing);
-            },
-            error: () => {
-              // Product saved, but image upload failed
-              this.onSaveSuccess(editing);
-              this.messageService.add({
-                severity: 'warn',
-                summary: 'Image Upload Failed',
-                detail: 'Product saved but image could not be uploaded.',
-              });
-            },
-          });
-        } else {
-          this.onSaveSuccess(editing);
-        }
+      next: () => {
+        this.onSaveSuccess(editing);
       },
       error: () => {
         this.isSubmitting.set(false);
