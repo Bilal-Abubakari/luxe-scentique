@@ -6,7 +6,7 @@
       <h2 class="page-title">Inventory</h2>
       <p class="page-subtitle">Manage your perfume catalog and stock levels</p>
     </div>
-    <button
+    <p-button
       pButton
       pRipple
       type="button"
@@ -15,7 +15,7 @@
       class="add-btn"
       aria-label="Add new product to inventory"
       (click)="openAddDialog()"
-    ></button>
+    ></p-button>
   </header>
 
   <!-- Search Bar -->
@@ -39,7 +39,7 @@
     @if (isLoading()) {
       <div class="loading-state" aria-busy="true" aria-label="Loading products">
         @for (_ of [1, 2, 3, 4, 5]; track $index) {
-          <p-skeleton height="60px" styleClass="mb-2" />
+          <p-skeleton height="60px" class="mb-2" />
         }
       </div>
     } @else {
@@ -55,7 +55,7 @@
         [sortMode]="'single'"
         [scrollable]="true"
         scrollHeight="calc(100vh - 380px)"
-        styleClass="p-datatable-sm"
+        class="p-datatable-sm"
         [tableStyle]="{ 'min-width': '900px' }"
         aria-label="Products inventory table"
         role="grid"
@@ -137,7 +137,7 @@
                   <p-tag
                     [value]="(product.stock ?? 0) === 0 ? 'Out' : 'Low'"
                     [severity]="getStockSeverity(product.stock ?? 0)"
-                    styleClass="stock-tag"
+                    class="stock-tag"
                     [attr.aria-label]="(product.stock ?? 0) === 0 ? 'Out of stock' : 'Low stock warning'"
                   />
                 }
@@ -156,16 +156,15 @@
             <!-- Actions -->
             <td role="gridcell" class="actions-cell">
               <div class="action-buttons" [attr.aria-label]="'Actions for ' + product.title">
-                <button
-                  pButton
+                <p-button
                   pRipple
                   type="button"
                   icon="pi pi-pencil"
                   class="p-button-text p-button-sm edit-btn"
                   [attr.aria-label]="'Edit ' + product.title"
                   (click)="openEditDialog(product)"
-                ></button>
-                <button
+                ></p-button>
+                <p-button
                   pButton
                   pRipple
                   type="button"
@@ -173,8 +172,8 @@
                   class="p-button-text p-button-danger p-button-sm"
                   [attr.aria-label]="'Delete ' + product.title"
                   (click)="confirmDelete(product, $event)"
-                ></button>
-              </div>
+                ></p-button>
+              </div>W
             </td>
           </tr>
         </ng-template>
@@ -185,8 +184,7 @@
               <output class="empty-table">
                 <i class="pi pi-box" aria-hidden="true"></i>
                 <p>No products found. Add your first product!</p>
-                <button
-                  pButton
+                <p-button
                   pRipple
                   type="button"
                   label="Add Product"
@@ -194,7 +192,7 @@
                   class="p-button-outlined"
                   (click)="openAddDialog()"
                   aria-label="Add first product"
-                ></button>
+                ></p-button>
               </output>
             </td>
           </tr>
@@ -269,14 +267,14 @@
         <label for="product-vibe" class="form-label">
           Vibe / Category <span class="required-star" aria-hidden="true">*</span>
         </label>
-        <p-dropdown
+        <p-select
           inputId="product-vibe"
           formControlName="vibe"
           [options]="vibeOptions"
           optionLabel="label"
           optionValue="value"
           placeholder="Select a vibe"
-          styleClass="w-full"
+          class="w-full"
           [class.ng-invalid]="isFieldInvalid('vibe')"
           aria-required="true"
           [attr.aria-describedby]="isFieldInvalid('vibe') ? 'vibe-error' : null"
@@ -298,7 +296,7 @@
           currency="GHS"
           locale="en-GH"
           placeholder="0.00"
-          styleClass="w-full"
+          class="w-full"
           [class.ng-invalid]="isFieldInvalid('price')"
           aria-required="true"
           [attr.aria-describedby]="isFieldInvalid('price') ? 'price-error' : null"
@@ -320,7 +318,7 @@
           [min]="0"
           [step]="1"
           placeholder="0"
-          styleClass="w-full"
+          class="w-full"
           [showButtons]="true"
           [class.ng-invalid]="isFieldInvalid('stock')"
           aria-required="true"
@@ -338,7 +336,7 @@
         </label>
         <textarea
           id="product-description"
-          pInputTextarea
+          pTextarea
           formControlName="description"
           [rows]="4"
           placeholder="Describe the fragrance notes, character, and experience..."
@@ -398,7 +396,7 @@
             <label for="product-active" class="form-label toggle-label">Product Status</label>
             <span class="toggle-hint">Active products are visible in the store</span>
           </div>
-          <p-inputSwitch
+          <p-toggleswitch
             inputId="product-active"
             formControlName="isActive"
             [attr.aria-label]="'Toggle product active status: ' + (productForm.get('isActive')?.value ? 'currently active' : 'currently inactive')"
@@ -412,8 +410,7 @@
 
   <ng-template pTemplate="footer">
     <div class="dialog-footer">
-      <button
-        pButton
+      <p-button
         pRipple
         type="button"
         label="Cancel"
@@ -421,9 +418,8 @@
         class="p-button-outlined"
         (click)="closeDialog()"
         aria-label="Cancel and close dialog"
-      ></button>
-      <button
-        pButton
+      ></p-button>
+      <p-button
         pRipple
         type="button"
         [label]="editingProduct() ? 'Update Product' : 'Add Product'"
@@ -433,7 +429,7 @@
         (click)="saveProduct()"
         [attr.aria-label]="(editingProduct() ? 'Update' : 'Save') + ' product'"
         aria-live="polite"
-      ></button>
+      ></p-button>
     </div>
   </ng-template>
 </p-dialog>

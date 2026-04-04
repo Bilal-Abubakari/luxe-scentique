@@ -78,7 +78,7 @@
                   <span class="result-price">{{ formatCurrency(product.price) }}</span>
                   <p-tag
                     [value]="'Stock: ' + product.stock"
-                    [severity]="product.stock < 5 ? 'warning' : 'success'"
+                    [severity]="product.stock < 5 ? 'warn' : 'success'"
                     styleClass="result-stock-tag"
                   />
                 </div>
@@ -225,7 +225,7 @@
               <label for="sale-notes" class="form-label">Notes (Optional)</label>
               <textarea
                 id="sale-notes"
-                pInputTextarea
+                pTextarea
                 formControlName="notes"
                 [rows]="3"
                 placeholder="Any special requests or notes for this order..."

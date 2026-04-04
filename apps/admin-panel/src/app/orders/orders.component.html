@@ -31,7 +31,7 @@
     </div>
 
     <!-- Status Filter -->
-    <p-dropdown
+    <p-select
       [options]="statusFilterOptions"
       [ngModel]="selectedStatus()"
       (ngModelChange)="onStatusFilterChange($event)"
@@ -137,7 +137,7 @@
             <!-- Status Update -->
             <td role="gridcell">
               @if (getNextStatuses(order.status).length > 0) {
-                <p-dropdown
+                <p-select
                   [options]="getNextStatuses(order.status)"
                   optionLabel="label"
                   optionValue="value"

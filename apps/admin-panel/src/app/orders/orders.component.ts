@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -37,7 +37,7 @@ interface StatusUpdateOption {
     TableModule,
     ButtonModule,
     DialogModule,
-    DropdownModule,
+    SelectModule,
     TagModule,
     ToastModule,
     SkeletonModule,
@@ -178,9 +178,9 @@ export class OrdersComponent implements OnInit {
 
   getStatusSeverity(
     status: string
-  ): 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'contrast' | undefined {
-    const map: Record<string, 'success' | 'info' | 'warning' | 'danger' | 'secondary'> = {
-      PENDING: 'warning',
+  ): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined {
+    const map: Record<string, 'success' | 'info' | 'warn' | 'danger' | 'secondary'> = {
+      PENDING: 'warn',
       PROCESSING: 'info',
       SHIPPED: 'secondary',
       DELIVERED: 'success',
@@ -191,8 +191,8 @@ export class OrdersComponent implements OnInit {
 
   getPaymentSeverity(
     method: string
-  ): 'success' | 'info' | 'warning' | 'danger' | 'secondary' | undefined {
-    const map: Record<string, 'success' | 'info' | 'warning'> = {
+  ): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | undefined {
+    const map: Record<string, 'success' | 'info' | 'warn'> = {
       ONLINE: 'info',
       WALK_IN: 'success',
     };

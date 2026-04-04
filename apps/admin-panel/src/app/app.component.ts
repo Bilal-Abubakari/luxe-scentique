@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterOutlet } from '@angular/router';
 import { AuthService } from './core/services/auth.service';
 import { LayoutComponent } from './layout/layout.component';
@@ -7,7 +7,7 @@ import { LayoutComponent } from './layout/layout.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, LayoutComponent],
+  imports: [RouterOutlet, LayoutComponent],
   template: `
     @if (isLoggedIn()) {
       <app-layout>

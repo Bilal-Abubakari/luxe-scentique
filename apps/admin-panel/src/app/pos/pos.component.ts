@@ -1,10 +1,10 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule} from '@angular/forms';
 import { AutoCompleteModule, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
-import { InputTextareaModule } from 'primeng/inputtextarea';
+import { TextareaModule } from 'primeng/textarea';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { DividerModule } from 'primeng/divider';
@@ -26,21 +26,20 @@ interface CartItem {
   selector: 'app-pos',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     FormsModule,
     AutoCompleteModule,
     InputNumberModule,
     InputTextModule,
-    InputTextareaModule,
+    TextareaModule,
     ButtonModule,
     CardModule,
     DividerModule,
     TagModule,
     ToastModule,
     BadgeModule,
-    RippleModule,
-  ],
+    RippleModule
+],
   templateUrl: './pos.component.html',
   styleUrl: './pos.component.scss',
 })
@@ -312,15 +311,15 @@ export class PosComponent implements OnInit {
 
   getVibeSeverity(
     vibe: string
-  ): 'success' | 'info' | 'warning' | 'danger' | 'secondary' | undefined {
-    const map: Record<string, 'success' | 'info' | 'warning' | 'danger' | 'secondary'> = {
+  ): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | undefined {
+    const map: Record<string, 'success' | 'info' | 'warn' | 'danger' | 'secondary'> = {
       CORPORATE: 'secondary',
       CASUAL: 'success',
       EVENING: 'info',
-      SPORT: 'warning',
+      SPORT: 'warn',
       UNISEX: 'info',
       FEMININE: 'danger',
-      MASCULINE: 'warning',
+      MASCULINE: 'warn',
     };
     return map[vibe] ?? 'secondary';
   }

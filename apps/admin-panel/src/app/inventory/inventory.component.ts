@@ -1,14 +1,14 @@
 import { Component, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { TableModule, Table } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { InputTextareaModule } from 'primeng/inputtextarea';
-import { DropdownModule } from 'primeng/dropdown';
-import { InputSwitchModule } from 'primeng/inputswitch';
+import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { TagModule } from 'primeng/tag';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
@@ -35,15 +35,16 @@ interface VibeOption {
     DialogModule,
     InputTextModule,
     InputNumberModule,
-    InputTextareaModule,
-    DropdownModule,
-    InputSwitchModule,
+    TextareaModule,
+    SelectModule,
+    ToggleSwitchModule,
     TagModule,
     ConfirmDialogModule,
     ToastModule,
     SkeletonModule,
     BadgeModule,
     RippleModule,
+    NgOptimizedImage,
   ],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss',
@@ -279,16 +280,16 @@ export class InventoryComponent implements OnInit {
   }
 
   getVibeSeverity(
-    vibe: string
-  ): 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'contrast' | undefined {
-    const map: Record<string, 'success' | 'info' | 'warning' | 'danger' | 'secondary'> = {
+    vibe: string,
+  ): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined {
+    const map: Record<string, 'success' | 'info' | 'warn' | 'danger' | 'secondary'> = {
       Fresh: 'success',
-      Woody: 'warning',
+      Woody: 'warn',
       Floral: 'info',
       Oriental: 'danger',
       Aquatic: 'info',
       Citrus: 'success',
-      Gourmand: 'warning',
+      Gourmand: 'warn',
       Chypre: 'secondary',
       Fougère: 'secondary',
       Spicy: 'danger',
@@ -296,9 +297,9 @@ export class InventoryComponent implements OnInit {
     return map[vibe] ?? 'secondary';
   }
 
-  getStockSeverity(stock: number): 'success' | 'warning' | 'danger' {
+  getStockSeverity(stock: number): 'success' | 'warn' | 'danger' {
     if (stock === 0) return 'danger';
-    if (stock < 10) return 'warning';
+    if (stock < 10) return 'warn';
     return 'success';
   }
 

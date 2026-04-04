@@ -192,9 +192,9 @@ export class DashboardComponent implements OnInit {
 
   getStatusSeverity(
     status: string,
-  ): 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'contrast' | undefined {
-    const map: Record<string, 'success' | 'info' | 'warning' | 'danger' | 'secondary'> = {
-      PENDING: 'warning',
+  ): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined {
+    const map: Record<string, 'success' | 'info' | 'warn' | 'danger' | 'secondary'> = {
+      PENDING: 'warn',
       PROCESSING: 'info',
       SHIPPED: 'secondary',
       DELIVERED: 'success',
@@ -203,10 +203,10 @@ export class DashboardComponent implements OnInit {
     return map[status];
   }
 
-  getStockSeverity(stock: number): 'danger' | 'warning' | 'success' {
+  getStockSeverity(stock: number): 'danger' | 'warn' | 'success' {
     if (stock === 0) return 'danger';
     if (stock < 5) return 'danger';
-    return 'warning';
+    return 'warn';
   }
 
   formatCurrency(amount: number): string {

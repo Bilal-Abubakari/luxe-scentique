@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -10,7 +10,7 @@ import { AuthService } from '../core/services/auth.service';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ButtonModule, CardModule, DividerModule, RippleModule],
+  imports: [ButtonModule, CardModule, DividerModule, RippleModule],
   templateUrl: './login.component.html',
   styles: [
     `

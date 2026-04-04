@@ -1,5 +1,5 @@
 import { Component, inject, signal, HostListener } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
@@ -18,14 +18,13 @@ interface NavItem {
   selector: 'app-layout',
   standalone: true,
   imports: [
-    CommonModule,
     RouterLink,
     RouterLinkActive,
     ButtonModule,
     ToastModule,
     ConfirmDialogModule,
-    RippleModule,
-  ],
+    RippleModule
+],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss',
 })

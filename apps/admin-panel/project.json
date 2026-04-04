@@ -13,7 +13,7 @@
         "outputPath": "dist/apps/admin-panel",
         "index": "apps/admin-panel/src/index.html",
         "browser": "apps/admin-panel/src/main.ts",
-        "polyfills": ["zone.js"],
+        "polyfills": ["reflect-metadata", "zone.js"],
         "tsConfig": "apps/admin-panel/tsconfig.app.json",
         "assets": [
           "apps/admin-panel/src/favicon.ico",
