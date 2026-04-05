@@ -4,6 +4,8 @@ import { Playfair_Display, Inter } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import { Navbar } from '../components/layout/navbar';
 import { Footer } from '../components/layout/footer';
+import { CartProvider } from '../components/cart/cart-context';
+import { CartDrawer } from '../components/cart/cart-drawer';
 import './globals.css';
 
 const playfairDisplay = Playfair_Display({
@@ -73,12 +75,14 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
       suppressHydrationWarning
     >
       <body className="bg-cream text-onyx font-body antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem={false}
-          disableTransitionOnChange
-        >
+        <CartProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem={false}
+            disableTransitionOnChange
+          >
+          <CartDrawer />
           <div className="flex flex-col min-h-screen">
             <a
               href="#main-content"
@@ -99,7 +103,8 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
               <Footer />
             </footer>
           </div>
-        </ThemeProvider>
+          </ThemeProvider>
+        </CartProvider>
       </body>
     </html>
   );

@@ -1,13 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import {
-  CreateProductDto,
-  UpdateProductDto,
-  ProductQueryDto,
   IPerfumePaginated,
   IPerfume,
   ProductVibe,
 } from '@luxe-scentique/shared-types';
+import {
+  CreateProductDto,
+  UpdateProductDto,
+  ProductQueryDto,
+} from '@luxe-scentique/shared-types/dtos';
 
 type PrismaProductRow = {
   id: string;
@@ -99,8 +101,9 @@ export class ProductsService {
   private buildProductWhere(query: ProductQueryDto) {
     const { vibe, minPrice, maxPrice, brand, inStock, search, isActive } = query;
     const priceFilter = this.buildPriceFilter(minPrice, maxPrice);
+    const isActiveFilter = isActive === undefined ? undefined : { isActive };
     return {
-      isActive: isActive ?? true,
+      ...isActiveFilter,
       ...(vibe ? { vibe } : {}),
       ...(brand ? { brand: { contains: brand, mode: 'insensitive' as const } } : {}),
       ...(inStock ? { stock: { gt: 0 } } : {}),

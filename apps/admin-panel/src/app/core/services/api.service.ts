@@ -6,10 +6,12 @@ import type {
   IPerfume,
   IPerfumePaginated,
   IOrder,
+} from '@luxe-scentique/shared-types';
+import type {
   CreateProductDto,
   UpdateProductDto,
   CreateWalkInOrderDto,
-} from '@luxe-scentique/shared-types';
+} from '@luxe-scentique/shared-types/dtos';
 import { environment } from '../../../environments/environment';
 
 type UnknownKeys = string | number | boolean | undefined;

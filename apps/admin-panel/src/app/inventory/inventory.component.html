@@ -35,16 +35,9 @@
 
   <!-- Products Table -->
   <div class="table-wrapper">
-    @if (isLoading()) {
-      <div class="loading-state" aria-busy="true" aria-label="Loading products">
-        @for (_ of [1, 2, 3, 4, 5]; track $index) {
-          <p-skeleton height="60px" class="mb-2" />
-        }
-      </div>
-    } @else {
-      <p-table
+    <p-table
         #productTable
-        [value]="products()"
+        [value]="isLoading() ? skeletonItems : products()"
         [lazy]="true"
         [totalRecords]="totalProducts()"
         [rows]="pageSize()"
@@ -82,99 +75,124 @@
         </ng-template>
 
         <ng-template pTemplate="body" let-product>
-          <tr role="row" class="product-row">
-            <!-- Product Title -->
-            <td role="gridcell">
-              <div class="product-cell">
-                <div class="product-image-placeholder" aria-hidden="true">
-                  @if (product.imageUrl) {
-                    <img [src]="product.imageUrl" [alt]="product.title" class="product-thumb" />
-                  } @else {
-                    <i class="pi pi-image"></i>
+          @if (isLoading()) {
+            <tr>
+              <td>
+                <div class="product-cell">
+                  <p-skeleton shape="square" size="40px" />
+                  <div class="product-details" style="flex: 1">
+                    <p-skeleton width="120px" height="14px" />
+                    <p-skeleton width="80px" height="10px" class="mt-1" />
+                  </div>
+                </div>
+              </td>
+              <td><p-skeleton width="80px" /></td>
+              <td><p-skeleton width="60px" height="22px" borderRadius="4px" /></td>
+              <td><p-skeleton width="70px" /></td>
+              <td><p-skeleton width="50px" /></td>
+              <td><p-skeleton width="65px" height="22px" borderRadius="4px" /></td>
+              <td>
+                <div class="action-buttons">
+                  <p-skeleton shape="circle" size="2rem" />
+                  <p-skeleton shape="circle" size="2rem" />
+                </div>
+              </td>
+            </tr>
+          } @else {
+            <tr role="row" class="product-row">
+              <!-- Product Title -->
+              <td role="gridcell">
+                <div class="product-cell">
+                  <div class="product-image-placeholder" aria-hidden="true">
+                    @let images = product.images;
+                    @if (images.length > 0) {
+                      <img [src]="images[0]" [alt]="product.title" class="product-thumb" />
+                    } @else {
+                      <i class="pi pi-image"></i>
+                    }
+                  </div>
+                  <div class="product-details">
+                    <span class="product-title-text">{{ product.title }}</span>
+                    @if (product.description) {
+                      <span class="product-desc-preview">{{ product.description | slice: 0 : 50 }}{{ (product.description?.length ?? 0) > 50 ? '...' : '' }}</span>
+                    }
+                  </div>
+                </div>
+              </td>
+
+              <!-- Brand -->
+              <td role="gridcell">
+                <span class="brand-text">{{ product.brand }}</span>
+              </td>
+
+              <!-- Vibe -->
+              <td role="gridcell">
+                <p-tag
+                  [value]="product.vibe"
+                  [severity]="getVibeSeverity(product.vibe)"
+                  [attr.aria-label]="'Vibe: ' + product.vibe"
+                />
+              </td>
+
+              <!-- Price -->
+              <td role="gridcell" class="price-cell">
+                {{ formatCurrency(product.price ?? 0) }}
+              </td>
+
+              <!-- Stock -->
+              <td role="gridcell">
+                <div class="stock-cell">
+                  <span
+                    class="stock-number"
+                    [class.stock-low]="(product.stock ?? 0) < 10"
+                    [class.stock-out]="(product.stock ?? 0) === 0"
+                    [attr.aria-label]="(product.stock ?? 0) + ' units in stock'"
+                  >
+                    {{ product.stock ?? 0 }}
+                  </span>
+                  @if ((product.stock ?? 0) < 10) {
+                    <p-tag
+                      [value]="(product.stock ?? 0) === 0 ? 'Out' : 'Low'"
+                      [severity]="getStockSeverity(product.stock ?? 0)"
+                      class="stock-tag"
+                      [attr.aria-label]="(product.stock ?? 0) === 0 ? 'Out of stock' : 'Low stock warning'"
+                    />
                   }
                 </div>
-                <div class="product-details">
-                  <span class="product-title-text">{{ product.title }}</span>
-                  @if (product.description) {
-                    <span class="product-desc-preview">{{ product.description | slice: 0 : 50 }}{{ (product.description?.length ?? 0) > 50 ? '...' : '' }}</span>
-                  }
+              </td>
+
+              <!-- Status -->
+              <td role="gridcell">
+                <p-tag
+                  [value]="product.isActive ? 'Active' : 'Inactive'"
+                  [severity]="product.isActive ? 'success' : 'danger'"
+                  [attr.aria-label]="'Product is ' + (product.isActive ? 'active' : 'inactive')"
+                />
+              </td>
+
+              <!-- Actions -->
+              <td role="gridcell" class="actions-cell">
+                <div class="action-buttons" [attr.aria-label]="'Actions for ' + product.title">
+                  <p-button
+                    pRipple
+                    type="button"
+                    icon="pi pi-pencil"
+                    class="p-button-text p-button-sm edit-btn"
+                    [attr.aria-label]="'Edit ' + product.title"
+                    (click)="openEditDialog(product)"
+                  ></p-button>
+                  <p-button
+                    pRipple
+                    type="button"
+                    icon="pi pi-trash"
+                    class="p-button-text p-button-danger p-button-sm"
+                    [attr.aria-label]="'Delete ' + product.title"
+                    (click)="confirmDelete(product, $event)"
+                  ></p-button>
                 </div>
-              </div>
-            </td>
-
-            <!-- Brand -->
-            <td role="gridcell">
-              <span class="brand-text">{{ product.brand }}</span>
-            </td>
-
-            <!-- Vibe -->
-            <td role="gridcell">
-              <p-tag
-                [value]="product.vibe"
-                [severity]="getVibeSeverity(product.vibe)"
-                [attr.aria-label]="'Vibe: ' + product.vibe"
-              />
-            </td>
-
-            <!-- Price -->
-            <td role="gridcell" class="price-cell">
-              {{ formatCurrency(product.price ?? 0) }}
-            </td>
-
-            <!-- Stock -->
-            <td role="gridcell">
-              <div class="stock-cell">
-                <span
-                  class="stock-number"
-                  [class.stock-low]="(product.stock ?? 0) < 10"
-                  [class.stock-out]="(product.stock ?? 0) === 0"
-                  [attr.aria-label]="(product.stock ?? 0) + ' units in stock'"
-                >
-                  {{ product.stock ?? 0 }}
-                </span>
-                @if ((product.stock ?? 0) < 10) {
-                  <p-tag
-                    [value]="(product.stock ?? 0) === 0 ? 'Out' : 'Low'"
-                    [severity]="getStockSeverity(product.stock ?? 0)"
-                    class="stock-tag"
-                    [attr.aria-label]="(product.stock ?? 0) === 0 ? 'Out of stock' : 'Low stock warning'"
-                  />
-                }
-              </div>
-            </td>
-
-            <!-- Status -->
-            <td role="gridcell">
-              <p-tag
-                [value]="product.isActive ? 'Active' : 'Inactive'"
-                [severity]="product.isActive ? 'success' : 'danger'"
-                [attr.aria-label]="'Product is ' + (product.isActive ? 'active' : 'inactive')"
-              />
-            </td>
-
-            <!-- Actions -->
-            <td role="gridcell" class="actions-cell">
-              <div class="action-buttons" [attr.aria-label]="'Actions for ' + product.title">
-                <p-button
-                  pRipple
-                  type="button"
-                  icon="pi pi-pencil"
-                  class="p-button-text p-button-sm edit-btn"
-                  [attr.aria-label]="'Edit ' + product.title"
-                  (click)="openEditDialog(product)"
-                ></p-button>
-                <p-button
-                  pButton
-                  pRipple
-                  type="button"
-                  icon="pi pi-trash"
-                  class="p-button-text p-button-danger p-button-sm"
-                  [attr.aria-label]="'Delete ' + product.title"
-                  (click)="confirmDelete(product, $event)"
-                ></p-button>
-              </div>W
-            </td>
-          </tr>
+              </td>
+            </tr>
+          }
         </ng-template>
 
         <ng-template pTemplate="emptymessage">
@@ -196,8 +214,7 @@
             </td>
           </tr>
         </ng-template>
-      </p-table>
-    }
+    </p-table>
   </div>
 
 </section>

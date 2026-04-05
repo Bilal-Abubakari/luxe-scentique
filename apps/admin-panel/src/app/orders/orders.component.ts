@@ -211,6 +211,10 @@ export class OrdersComponent implements OnInit {
     return this.orderStatusWorkflow.filter((s) => nextStatuses.includes(s.value));
   }
 
+  get skeletonItems(): null[] {
+    return Array.from({ length: this.pageSize() });
+  }
+
   formatCurrency(amount: number): string {
     return new Intl.NumberFormat('en-GH', {
       style: 'currency',

@@ -28,16 +28,18 @@ import { ProductsService } from './products.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { StorageService } from '../storage/storage.service';
+import { StorageService, UploadPresets } from '../storage/storage.service';
 import {
   IPerfume,
   IPerfumePaginated,
   Role,
   ProductVibe,
+} from '@luxe-scentique/shared-types';
+import {
   CreateProductDto,
   UpdateProductDto,
   ProductQueryDto,
-} from '@luxe-scentique/shared-types';
+} from '@luxe-scentique/shared-types/dtos';
 
 @ApiTags('products')
 @Controller('products')
@@ -62,7 +64,7 @@ export class ProductsController {
     if (!files?.length) {
       throw new BadRequestException('At least one product image is required.');
     }
-    const images = await Promise.all(files.map((f) => this.storageService.upload(f)));
+    const images = await Promise.all(files.map((f) => this.storageService.upload(f, UploadPresets.PRODUCTS)));
     return this.productsService.create({ ...dto, images });
   }
 

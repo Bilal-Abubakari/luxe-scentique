@@ -1,51 +1,110 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import { v4 as uuidv4 } from 'uuid';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
+import * as crypto from 'node:crypto';
+
+export enum UploadPresets {
+  PRODUCTS = 'PRODUCTS',
+}
+
+export interface CloudinaryUploadResponse {
+  asset_id: string;
+  public_id: string;
+  version: number;
+  version_id: string;
+  signature: string;
+  width: number;
+  height: number;
+  format: string;
+  resource_type: string;
+  created_at: string;
+  tags: string[];
+  pages: number;
+  bytes: number;
+  type: string;
+  etag: string;
+  placeholder: boolean;
+  url: string;
+  secure_url: string;
+  folder: string;
+  access_mode: string;
+  existing: boolean;
+  original_filename: string;
+}
+
 
 @Injectable()
 export class StorageService {
   private readonly logger = new Logger(StorageService.name);
-  private readonly s3: S3Client;
-  private readonly bucketName: string;
-  private readonly publicUrl: string;
 
-  constructor(private readonly configService: ConfigService) {
-    this.bucketName = configService.get<string>('r2.bucketName') ?? '';
-    this.publicUrl = configService.get<string>('r2.publicUrl') ?? '';
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly httpService: HttpService,
+  ) {}
 
-    this.s3 = new S3Client({
-      region: 'auto',
-      endpoint: `https://${configService.get<string>('r2.accountId')}.r2.cloudflarestorage.com`,
-      credentials: {
-        accessKeyId: configService.get<string>('r2.accessKeyId') ?? '',
-        secretAccessKey: configService.get<string>('r2.secretAccessKey') ?? '',
-      },
-    });
-  }
+  async upload(file: Express.Multer.File, preset: UploadPresets): Promise<string> {
+    const timestamp = Date.now();
+    const publicId = `${file.originalname}-${timestamp}`;
+    const formData = new FormData();
 
-  async upload(file: Express.Multer.File, folder = 'products'): Promise<string> {
-    const extension = file.originalname.split('.').pop() ?? 'jpg';
-    const key = `${folder}/${uuidv4()}.${extension}`;
-
-    await this.s3.send(
-      new PutObjectCommand({
-        Bucket: this.bucketName,
-        Key: key,
-        Body: file.buffer,
-        ContentType: file.mimetype,
-        CacheControl: 'public, max-age=31536000',
-      }),
+    const uint8Array = new Uint8Array(file.buffer);
+    const blob = new Blob([uint8Array], { type: 'application/octet-stream' });
+    formData.append('file', blob, file.originalname);
+    formData.append('public_id', publicId);
+    formData.append('api_key', this.configService.get<string>('cloudinary.apiKey') ?? '');
+    formData.append('timestamp', timestamp.toString());
+    formData.append(
+      'upload_preset',
+      this.configService.get<string>(`cloudinary.presets.${preset}`) ?? '',
     );
 
-    const url = `${this.publicUrl}/${key}`;
-    this.logger.log(`Uploaded file: ${url}`);
-    return url;
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post<CloudinaryUploadResponse>(
+          this.configService.get<string>('cloudinary.baseUrl') ?? '',
+          formData,
+          { headers: { 'content-type': 'multipart/form-data' } },
+        ),
+      );
+
+      this.logger.log(`Uploaded file: ${response.data.secure_url}`);
+      return response.data.secure_url;
+    } catch (error) {
+      this.logger.error(`Error: ${(error as Error).message}`);
+      throw new InternalServerErrorException('Failed to upload file');
+    }
   }
 
-  async delete(url: string): Promise<void> {
-    const key = url.replace(`${this.publicUrl}/`, '');
-    await this.s3.send(new DeleteObjectCommand({ Bucket: this.bucketName, Key: key }));
-    this.logger.log(`Deleted file: ${key}`);
+  async delete(publicId: string): Promise<void> {
+    const timestamp = Math.floor(Date.now() / 1000);
+    const apiKey = this.configService.get<string>('cloudinary.apiKey') ?? '';
+    const apiSecret = this.configService.get<string>('cloudinary.apiSecret') ?? '';
+
+    const signaturePayload = `public_id=${publicId}&timestamp=${timestamp}${apiSecret}`;
+    const signature = crypto.createHash('sha1').update(signaturePayload).digest('hex');
+
+    const destroyUrl = (this.configService.get<string>('cloudinary.baseUrl') ?? '').replace(
+      '/upload',
+      '/destroy',
+    );
+
+    const formData = new FormData();
+    formData.append('public_id', publicId);
+    formData.append('api_key', apiKey);
+    formData.append('timestamp', timestamp.toString());
+    formData.append('signature', signature);
+
+    try {
+      await firstValueFrom(
+        this.httpService.post(destroyUrl, formData, {
+          headers: { 'content-type': 'multipart/form-data' },
+        }),
+      );
+      this.logger.log(`Deleted file: ${publicId}`);
+    } catch (error) {
+      this.logger.error(`Error: ${(error as Error).message}`);
+      throw new InternalServerErrorException('Failed to delete file');
+    }
   }
 }

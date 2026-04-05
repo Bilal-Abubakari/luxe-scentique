@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { IPerfume } from '@luxe-scentique/shared-types';
 import { formatPrice, cn } from '../../lib/utils';
+import { AddToCartButton } from '../cart/add-to-cart-button';
 
 const SERVICE_FEE_RATE = 0.02; // 2% service fee
 
@@ -148,25 +149,16 @@ export function ProductCard({ product, className }: Readonly<ProductCardProps>) 
           </div>
 
           {/* Add to Cart Button */}
-          <button
-            type="button"
-            disabled={product.stock === 0}
-            className={cn(
-              'w-full py-2.5 px-4 rounded text-sm font-medium transition-all duration-200',
-              'focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2',
-              product.stock > 0
-                ? 'bg-gold text-onyx hover:bg-gold-500 hover:shadow-gold-md active:scale-[0.98]'
-                : 'bg-onyx-100 text-onyx-400 cursor-not-allowed',
-            )}
-            aria-label={
-              product.stock > 0
-                ? `Add ${product.title} to cart`
-                : `${product.title} is out of stock`
-            }
-            aria-disabled={product.stock === 0}
-          >
-            {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
-          </button>
+          <AddToCartButton
+            product={{
+              id: product.id,
+              title: product.title,
+              brand: product.brand,
+              price: product.price,
+              image: primaryImage,
+              stock: product.stock,
+            }}
+          />
         </div>
       </div>
     </article>

@@ -29,12 +29,13 @@ export const configuration = () => ({
     serviceFeeMin: 0.5,
   },
 
-  r2: {
-    accountId: process.env['R2_ACCOUNT_ID'] ?? '',
-    accessKeyId: process.env['R2_ACCESS_KEY_ID'] ?? '',
-    secretAccessKey: process.env['R2_SECRET_ACCESS_KEY'] ?? '',
-    bucketName: process.env['R2_BUCKET_NAME'] ?? 'luxe-scentique-assets',
-    publicUrl: process.env['R2_PUBLIC_URL'] ?? '',
+  cloudinary: {
+    apiKey: process.env['CLOUDINARY_API_KEY'] ?? '',
+    apiSecret: process.env['CLOUDINARY_API_SECRET'] ?? '',
+    baseUrl: process.env['CLOUDINARY_BASE_URL'] ?? '',
+    presets: {
+      PRODUCTS: process.env['CLOUDINARY_PRODUCTS'] ?? '',
+    },
   },
 
   superAdmin: {

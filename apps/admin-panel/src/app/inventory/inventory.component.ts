@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { TableModule, Table } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -17,7 +17,9 @@ import { BadgeModule } from 'primeng/badge';
 import { RippleModule } from 'primeng/ripple';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ApiService } from '../core/services/api.service';
-import type { IPerfume, UpdateProductDto } from '@luxe-scentique/shared-types';
+import type { IPerfume } from '@luxe-scentique/shared-types';
+import { ProductVibe } from '@luxe-scentique/shared-types';
+import type { UpdateProductDto } from '@luxe-scentique/shared-types/dtos';
 
 interface VibeOption {
   label: string;
@@ -44,7 +46,6 @@ interface VibeOption {
     SkeletonModule,
     BadgeModule,
     RippleModule,
-    NgOptimizedImage,
   ],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss',
@@ -72,18 +73,10 @@ export class InventoryComponent implements OnInit {
 
   productForm!: FormGroup;
 
-  readonly vibeOptions: VibeOption[] = [
-    { label: 'Fresh', value: 'Fresh' },
-    { label: 'Woody', value: 'Woody' },
-    { label: 'Floral', value: 'Floral' },
-    { label: 'Oriental', value: 'Oriental' },
-    { label: 'Aquatic', value: 'Aquatic' },
-    { label: 'Citrus', value: 'Citrus' },
-    { label: 'Gourmand', value: 'Gourmand' },
-    { label: 'Chypre', value: 'Chypre' },
-    { label: 'Fougère', value: 'Fougère' },
-    { label: 'Spicy', value: 'Spicy' },
-  ];
+  readonly vibeOptions: VibeOption[] = Object.values(ProductVibe).map((v) => ({
+    label: v.charAt(0) + v.slice(1).toLowerCase(),
+    value: v,
+  }));
 
   ngOnInit(): void {
     this.initForm();
@@ -283,16 +276,13 @@ export class InventoryComponent implements OnInit {
     vibe: string,
   ): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined {
     const map: Record<string, 'success' | 'info' | 'warn' | 'danger' | 'secondary'> = {
-      Fresh: 'success',
-      Woody: 'warn',
-      Floral: 'info',
-      Oriental: 'danger',
-      Aquatic: 'info',
-      Citrus: 'success',
-      Gourmand: 'warn',
-      Chypre: 'secondary',
-      Fougère: 'secondary',
-      Spicy: 'danger',
+      [ProductVibe.CORPORATE]: 'info',
+      [ProductVibe.CASUAL]: 'success',
+      [ProductVibe.EVENING]: 'danger',
+      [ProductVibe.SPORT]: 'warn',
+      [ProductVibe.UNISEX]: 'secondary',
+      [ProductVibe.FEMININE]: 'info',
+      [ProductVibe.MASCULINE]: 'warn',
     };
     return map[vibe] ?? 'secondary';
   }
@@ -318,6 +308,10 @@ export class InventoryComponent implements OnInit {
       return `Maximum ${field.errors['maxlength'].requiredLength as number} characters.`;
     if (field.errors['min']) return `Minimum value is ${field.errors['min'].min as number}.`;
     return 'Invalid value.';
+  }
+
+  get skeletonItems(): object[] {
+    return Array.from({ length: this.pageSize() }, () => ({}));
   }
 
   formatCurrency(amount: number): string {

@@ -1,19 +1,22 @@
+import { Suspense } from 'react';
 import { HeroSection } from '../components/hero/hero-section';
 import { ProductGrid } from '../components/products/product-grid';
-import { ProductCard } from '../components/products/product-card';
 import { getProducts } from '../lib/api';
-import type { IPerfume } from '@luxe-scentique/shared-types';
+import { IPerfume } from '@luxe-scentique/shared-types';
 
-async function FeaturedProducts() {
-  let products: IPerfume[];
-
+async function FeaturedProductsGrid() {
+  let products: IPerfume[] = [];
   try {
-    const result = await getProducts({ limit: 3, isActive: true, page: 1 });
+    const result = await getProducts({ limit: 6, isActive: true, page: 1 });
     products = result.data;
-  } catch {
-    products = [];
+  } catch (error) {
+    console.error('Failed to fetch featured products:', error);
   }
 
+  return <ProductGrid products={products} isLoading={false} />;
+}
+
+function FeaturedProducts() {
   return (
     <section
       aria-labelledby="featured-heading"
@@ -35,15 +38,9 @@ async function FeaturedProducts() {
         </p>
       </div>
 
-      {products.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      ) : (
-        <ProductGrid products={[]} isLoading={false} />
-      )}
+      <Suspense fallback={<ProductGrid products={[]} isLoading={true} />}>
+        <FeaturedProductsGrid />
+      </Suspense>
 
       <div className="text-center mt-12">
         <a
@@ -221,7 +218,7 @@ function NewsletterCTA() {
   );
 }
 
-export default async function HomePage() {
+export default function HomePage() {
   return (
     <>
       <HeroSection />

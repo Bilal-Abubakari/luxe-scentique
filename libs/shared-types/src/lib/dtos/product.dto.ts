@@ -5,13 +5,11 @@ import {
   IsNumber,
   IsInt,
   IsBoolean,
-  IsArray,
-  IsUrl,
   Min,
   MinLength,
   ValidateNested,
   IsPositive,
-  ArrayMinSize,
+  IsArray,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ProductVibe } from '../enums';
@@ -60,10 +58,10 @@ export class CreateProductDto {
   @Min(0)
   stock!: number;
 
+  @IsOptional()
   @IsArray()
-  @ArrayMinSize(1)
-  @IsUrl({}, { each: true })
-  images!: string[];
+  @IsString({ each: true })
+  images?: string[];
 
   @IsOptional()
   @IsBoolean()
@@ -106,7 +104,7 @@ export class UpdateProductDto {
 
   @IsOptional()
   @IsArray()
-  @IsUrl({}, { each: true })
+  @IsString({ each: true })
   images?: string[];
 
   @IsOptional()

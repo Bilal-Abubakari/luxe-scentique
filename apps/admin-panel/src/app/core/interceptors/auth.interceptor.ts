@@ -1,7 +1,7 @@
 import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpEvent } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
-const API_BASE = 'http://localhost:3000/api/v1';
 const TOKEN_KEY = 'luxe_token';
 
 export const authInterceptor: HttpInterceptorFn = (
@@ -9,7 +9,7 @@ export const authInterceptor: HttpInterceptorFn = (
   next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> => {
   // Only attach token for requests to our API
-  if (!req.url.startsWith(API_BASE)) {
+  if (!req.url.startsWith(environment.apiBase)) {
     return next(req);
   }
 

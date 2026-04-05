@@ -14,7 +14,8 @@ import { BadgeModule } from 'primeng/badge';
 import { RippleModule } from 'primeng/ripple';
 import { MessageService } from 'primeng/api';
 import { ApiService } from '../core/services/api.service';
-import type { IPerfume, CreateWalkInOrderDto } from '@luxe-scentique/shared-types';
+import type { IPerfume } from '@luxe-scentique/shared-types';
+import type { CreateWalkInOrderDto } from '@luxe-scentique/shared-types/dtos';
 
 interface CartItem {
   product: IPerfume;

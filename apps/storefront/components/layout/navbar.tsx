@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { getToken, removeToken } from '../../lib/auth';
+import { useCart } from '../cart/cart-context';
 import { cn } from '../../lib/utils';
 
 interface NavLink {
@@ -22,6 +23,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api/v
 
 export function Navbar() {
   const pathname = usePathname();
+  const { totalItems, openCart } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -114,6 +116,37 @@ export function Navbar() {
               );
             })}
           </div>
+
+          {/* Cart Icon */}
+          <button
+            onClick={openCart}
+            className="relative p-2 text-cream hover:text-gold transition-colors rounded focus-visible:ring-2 focus-visible:ring-gold"
+            aria-label={`Open cart${totalItems > 0 ? `, ${totalItems} item${totalItems === 1 ? '' : 's'}` : ''}`}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-6 h-6"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm5.625 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
+              />
+            </svg>
+            {totalItems > 0 && (
+              <span
+                className="absolute -top-0.5 -right-0.5 bg-gold text-onyx text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 leading-none"
+                aria-hidden="true"
+              >
+                {totalItems > 99 ? '99+' : totalItems}
+              </span>
+            )}
+          </button>
 
           {/* Desktop Auth */}
           <div className="hidden md:flex items-center gap-3">

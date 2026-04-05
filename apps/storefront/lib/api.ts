@@ -3,10 +3,12 @@ import type {
   IPerfumePaginated,
   IOrder,
   IServiceFeeCalculation,
+} from '@luxe-scentique/shared-types';
+import type {
   ProductQueryDto,
   CreateOrderDto,
-  OrderLookupDto
-} from '@luxe-scentique/shared-types';
+  OrderLookupDto,
+} from '@luxe-scentique/shared-types/dtos';
 import { getAuthHeaders } from './auth';
 
 const API_BASE_URL =

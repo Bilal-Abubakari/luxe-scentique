@@ -24,15 +24,17 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import {
-  CreateOrderDto,
-  UpdateOrderStatusDto,
-  OrderLookupDto,
-  CreateWalkInOrderDto,
   IOrder,
   IAuthUser,
   Role,
   OrderStatus,
 } from '@luxe-scentique/shared-types';
+import {
+  CreateOrderDto,
+  UpdateOrderStatusDto,
+  OrderLookupDto,
+  CreateWalkInOrderDto,
+} from '@luxe-scentique/shared-types/dtos';
 
 @ApiTags('orders')
 @Controller('orders')

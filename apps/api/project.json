@@ -38,7 +38,8 @@
       "configurations": {
         "development": {
           "buildTarget": "api:build:development",
-          "watch": true
+          "watch": true,
+          "inspect": false
         },
         "production": {
           "buildTarget": "api:build:production",

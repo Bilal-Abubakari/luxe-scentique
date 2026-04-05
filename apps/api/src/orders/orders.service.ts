@@ -7,14 +7,16 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { PaymentsService } from '../payments/payments.service';
 import {
-  CreateOrderDto,
-  UpdateOrderStatusDto,
-  OrderLookupDto,
-  CreateWalkInOrderDto,
   IOrder,
   OrderStatus,
   PaymentMethod,
 } from '@luxe-scentique/shared-types';
+import {
+  CreateOrderDto,
+  UpdateOrderStatusDto,
+  OrderLookupDto,
+  CreateWalkInOrderDto,
+} from '@luxe-scentique/shared-types/dtos';
 
 // Explicit shape of an order row with nested includes (avoids Prisma.OrderGetPayload before client generation)
 type OrderWithItems = {

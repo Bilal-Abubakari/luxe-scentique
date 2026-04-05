@@ -46,15 +46,8 @@
 
   <!-- Orders Table -->
   <div class="table-wrapper">
-    @if (isLoading()) {
-      <div class="loading-state" aria-busy="true" aria-label="Loading orders">
-        @for (_ of [1, 2, 3, 4, 5, 6]; track $index) {
-          <p-skeleton height="60px" styleClass="mb-2" />
-        }
-      </div>
-    } @else {
-      <p-table
-        [value]="orders()"
+    <p-table
+        [value]="isLoading() ? skeletonItems : orders()"
         [lazy]="true"
         [totalRecords]="totalOrders()"
         [rows]="pageSize()"
@@ -84,97 +77,118 @@
         </ng-template>
 
         <ng-template pTemplate="body" let-order>
-          <tr role="row" class="order-row">
+          @if (isLoading()) {
+            <tr aria-hidden="true">
+              <td><p-skeleton width="90px" /></td>
+              <td>
+                <div class="customer-cell">
+                  <p-skeleton width="110px" height="14px" />
+                  <p-skeleton width="140px" height="10px" styleClass="mt-1" />
+                </div>
+              </td>
+              <td class="date-cell">
+                <p-skeleton width="80px" height="14px" />
+                <p-skeleton width="60px" height="10px" styleClass="mt-1" />
+              </td>
+              <td><p-skeleton width="70px" height="22px" borderRadius="4px" /></td>
+              <td><p-skeleton width="80px" /></td>
+              <td><p-skeleton width="80px" height="22px" borderRadius="4px" /></td>
+              <td><p-skeleton width="120px" height="32px" borderRadius="6px" /></td>
+              <td class="details-cell"><p-skeleton shape="circle" size="2rem" /></td>
+            </tr>
+          } @else {
+            <tr role="row" class="order-row">
 
-            <!-- Order Number -->
-            <td role="gridcell">
-              <span class="order-number" [attr.aria-label]="'Order number: ' + (order.orderNumber ?? order.id.slice(-8))">
-                #{{ order.orderNumber ?? order.id.slice(-8) ?? 'N/A' }}
-              </span>
-            </td>
+              <!-- Order Number -->
+              <td role="gridcell">
+                <span class="order-number" [attr.aria-label]="'Order number: ' + (order.orderNumber ?? order.id.slice(-8))">
+                  #{{ order.orderNumber ?? order.id.slice(-8) ?? 'N/A' }}
+                </span>
+              </td>
 
-            <!-- Customer -->
-            <td role="gridcell">
-              <div class="customer-cell">
-                <span class="customer-name">{{ order.customerName ?? 'Walk-in Customer' }}</span>
-                @if (order.customerEmail) {
-                  <span class="customer-email">{{ order.customerEmail }}</span>
-                }
-              </div>
-            </td>
-
-            <!-- Date -->
-            <td role="gridcell" class="date-cell">
-              <span [attr.aria-label]="'Order date: ' + (order.createdAt | date: 'MMMM d, y')">
-                {{ order.createdAt | date: 'MMM d, y' }}
-              </span>
-              <span class="order-time">{{ order.createdAt | date: 'h:mm a' }}</span>
-            </td>
-
-            <!-- Payment Method -->
-            <td role="gridcell">
-              <p-tag
-                [value]="order.paymentMethod"
-                [severity]="getPaymentSeverity(order.paymentMethod)"
-                [attr.aria-label]="'Payment method: ' + order.paymentMethod"
-              />
-            </td>
-
-            <!-- Total -->
-            <td role="gridcell" class="total-cell">
-              {{ formatCurrency(order.total) }}
-            </td>
-
-            <!-- Status Badge -->
-            <td role="gridcell">
-              <p-tag
-                [value]="order.status"
-                [severity]="getStatusSeverity(order.status)"
-                [attr.aria-label]="'Current status: ' + order.status"
-              />
-            </td>
-
-            <!-- Status Update -->
-            <td role="gridcell">
-              @if (getNextStatuses(order.status).length > 0) {
-                <p-select
-                  [options]="getNextStatuses(order.status)"
-                  optionLabel="label"
-                  optionValue="value"
-                  [placeholder]="isUpdating() === order.id ? 'Updating...' : 'Move to...'"
-                  styleClass="status-update-dropdown"
-                  [disabled]="isUpdating() === order.id"
-                  (onChange)="updateOrderStatus(order, $event.value)"
-                  [attr.aria-label]="'Update status for order #' + (order.orderNumber ?? '')"
-                  [ngModel]="null"
-                />
-              } @else {
-                <output class="status-final">
-                  @if (order.status === 'DELIVERED') {
-                    <i class="pi pi-check-circle" aria-hidden="true" style="color: var(--color-success);"></i>
-                    Complete
-                  } @else if (order.status === 'CANCELLED') {
-                    <i class="pi pi-times-circle" aria-hidden="true" style="color: var(--color-danger);"></i>
-                    Cancelled
+              <!-- Customer -->
+              <td role="gridcell">
+                <div class="customer-cell">
+                  <span class="customer-name">{{ order.customerName ?? 'Walk-in Customer' }}</span>
+                  @if (order.customerEmail) {
+                    <span class="customer-email">{{ order.customerEmail }}</span>
                   }
-                </output>
-              }
-            </td>
+                </div>
+              </td>
 
-            <!-- View Details -->
-            <td role="gridcell" class="details-cell">
-              <button
-                pButton
-                pRipple
-                type="button"
-                icon="pi pi-eye"
-                class="p-button-text p-button-sm details-btn"
-                (click)="openOrderDetail(order)"
-                [attr.aria-label]="'View details for order #' + (order.orderNumber ?? order.id.slice(-8))"
-              ></button>
-            </td>
+              <!-- Date -->
+              <td role="gridcell" class="date-cell">
+                <span [attr.aria-label]="'Order date: ' + (order.createdAt | date: 'MMMM d, y')">
+                  {{ order.createdAt | date: 'MMM d, y' }}
+                </span>
+                <span class="order-time">{{ order.createdAt | date: 'h:mm a' }}</span>
+              </td>
 
-          </tr>
+              <!-- Payment Method -->
+              <td role="gridcell">
+                <p-tag
+                  [value]="order.paymentMethod"
+                  [severity]="getPaymentSeverity(order.paymentMethod)"
+                  [attr.aria-label]="'Payment method: ' + order.paymentMethod"
+                />
+              </td>
+
+              <!-- Total -->
+              <td role="gridcell" class="total-cell">
+                {{ formatCurrency(order.total) }}
+              </td>
+
+              <!-- Status Badge -->
+              <td role="gridcell">
+                <p-tag
+                  [value]="order.status"
+                  [severity]="getStatusSeverity(order.status)"
+                  [attr.aria-label]="'Current status: ' + order.status"
+                />
+              </td>
+
+              <!-- Status Update -->
+              <td role="gridcell">
+                @if (getNextStatuses(order.status).length > 0) {
+                  <p-select
+                    [options]="getNextStatuses(order.status)"
+                    optionLabel="label"
+                    optionValue="value"
+                    [placeholder]="isUpdating() === order.id ? 'Updating...' : 'Move to...'"
+                    styleClass="status-update-dropdown"
+                    [disabled]="isUpdating() === order.id"
+                    (onChange)="updateOrderStatus(order, $event.value)"
+                    [attr.aria-label]="'Update status for order #' + (order.orderNumber ?? '')"
+                    [ngModel]="null"
+                  />
+                } @else {
+                  <output class="status-final">
+                    @if (order.status === 'DELIVERED') {
+                      <i class="pi pi-check-circle" aria-hidden="true" style="color: var(--color-success);"></i>
+                      Complete
+                    } @else if (order.status === 'CANCELLED') {
+                      <i class="pi pi-times-circle" aria-hidden="true" style="color: var(--color-danger);"></i>
+                      Cancelled
+                    }
+                  </output>
+                }
+              </td>
+
+              <!-- View Details -->
+              <td role="gridcell" class="details-cell">
+                <button
+                  pButton
+                  pRipple
+                  type="button"
+                  icon="pi pi-eye"
+                  class="p-button-text p-button-sm details-btn"
+                  (click)="openOrderDetail(order)"
+                  [attr.aria-label]="'View details for order #' + (order.orderNumber ?? order.id.slice(-8))"
+                ></button>
+              </td>
+
+            </tr>
+          }
         </ng-template>
 
         <ng-template pTemplate="emptymessage">
@@ -187,8 +201,7 @@
             </td>
           </tr>
         </ng-template>
-      </p-table>
-    }
+    </p-table>
   </div>
 
 </section>
