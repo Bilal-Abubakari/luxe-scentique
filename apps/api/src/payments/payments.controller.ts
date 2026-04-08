@@ -16,6 +16,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiHeader } from '@nestjs
 import { Request } from 'express';
 import { PaymentsService, PaystackWebhookEvent } from './payments.service';
 import { IServiceFeeCalculation } from '@luxe-scentique/shared-types';
+import { PaystackInitializeDto } from '@luxe-scentique/shared-types/dtos';
 
 @ApiTags('payments')
 @Controller('payments')
@@ -30,6 +31,16 @@ export class PaymentsController {
   @ApiResponse({ status: 200, description: 'Returns fee breakdown' })
   calculateFee(@Query('subtotal') subtotal: string): IServiceFeeCalculation {
     return this.paymentsService.calculateServiceFee(Number.parseFloat(subtotal));
+  }
+
+  @Post('initialize')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Initialize a Paystack transaction for an existing order' })
+  @ApiResponse({ status: 200, description: 'Returns Paystack authorization URL and reference' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  @ApiResponse({ status: 400, description: 'Order already paid' })
+  initialize(@Body() dto: PaystackInitializeDto): Promise<{ authorization_url: string; access_code: string; reference: string }> {
+    return this.paymentsService.initializeOrderPayment(dto.orderId);
   }
 
   @Post('verify')

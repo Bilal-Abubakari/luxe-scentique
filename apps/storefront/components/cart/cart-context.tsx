@@ -15,6 +15,7 @@ export interface CartItem {
 interface CartContextValue {
   items: CartItem[];
   isOpen: boolean;
+  isHydrated: boolean;
   openCart: () => void;
   closeCart: () => void;
   addItem: (item: Omit<CartItem, 'quantity'>) => void;
@@ -31,6 +32,7 @@ const CART_KEY = 'luxe_cart';
 export function CartProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     try {
@@ -39,15 +41,17 @@ export function CartProvider({ children }: Readonly<{ children: ReactNode }>) {
     } catch {
       // localStorage unavailable
     }
+    setIsHydrated(true);
   }, []);
 
   useEffect(() => {
+    if (!isHydrated) return;
     try {
       localStorage.setItem(CART_KEY, JSON.stringify(items));
     } catch {
       // localStorage unavailable
     }
-  }, [items]);
+  }, [items, isHydrated]);
 
   const openCart = useCallback(() => setIsOpen(true), []);
   const closeCart = useCallback(() => setIsOpen(false), []);
@@ -89,6 +93,7 @@ export function CartProvider({ children }: Readonly<{ children: ReactNode }>) {
       value={{
         items,
         isOpen,
+        isHydrated,
         openCart,
         closeCart,
         addItem,

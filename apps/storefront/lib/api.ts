@@ -120,6 +120,46 @@ export async function lookupOrders(identifier: string): Promise<IOrder[]> {
 }
 
 /**
+ * Initialize a Paystack transaction for a given order.
+ * Returns the Paystack authorization URL to redirect the user to.
+ */
+export async function initializePayment(orderId: string): Promise<{
+  authorization_url: string;
+  access_code: string;
+  reference: string;
+}> {
+  return request('/payments/initialize', {
+    method: 'POST',
+    body: JSON.stringify({ orderId }),
+  });
+}
+
+/**
+ * Verify a Paystack transaction by reference.
+ */
+export async function verifyPayment(reference: string): Promise<{
+  status: string;
+  reference: string;
+  amount: number;
+  metadata?: Record<string, unknown>;
+}> {
+  return request('/payments/verify', {
+    method: 'POST',
+    body: JSON.stringify({ reference }),
+  });
+}
+
+/**
+ * Mark an order as paid after successful Paystack verification.
+ */
+export async function markOrderAsPaid(id: string, reference: string): Promise<IOrder> {
+  return request<IOrder>(`/orders/${encodeURIComponent(id)}/pay`, {
+    method: 'PATCH',
+    body: JSON.stringify({ reference }),
+  });
+}
+
+/**
  * Calculate service fee for a given subtotal.
  */
 export async function calculateFee(subtotal: number): Promise<IServiceFeeCalculation> {

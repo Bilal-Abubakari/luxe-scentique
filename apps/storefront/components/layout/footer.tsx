@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { SOCIAL_LINKS, CONTACT_INFO } from '../../lib/constants';
 
 const SHOP_LINKS = [
   { href: '/shop', label: 'All Fragrances' },
@@ -48,13 +49,14 @@ export function Footer() {
               who understand that scent is the most intimate expression of identity.
             </p>
             {/* Social Links */}
-            <div className="flex gap-4" aria-label="Social media links">
+            <div className="flex gap-3" aria-label="Social media links">
+              {/* Instagram */}
               <a
-                href="https://instagram.com/luxescentique"
+                href={SOCIAL_LINKS.instagram.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 flex items-center justify-center rounded-full border border-onyx-700 text-onyx-300 hover:border-gold hover:text-gold transition-colors focus-visible:ring-2 focus-visible:ring-gold"
-                aria-label="Follow us on Instagram (opens in new tab)"
+                aria-label={SOCIAL_LINKS.instagram.ariaLabel}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -72,25 +74,40 @@ export function Footer() {
                   <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
                 </svg>
               </a>
+
+              {/* WhatsApp */}
               <a
-                href="https://twitter.com/luxescentique"
+                href={SOCIAL_LINKS.whatsapp.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 flex items-center justify-center rounded-full border border-onyx-700 text-onyx-300 hover:border-gold hover:text-gold transition-colors focus-visible:ring-2 focus-visible:ring-gold"
-                aria-label="Follow us on Twitter (opens in new tab)"
+                aria-label={SOCIAL_LINKS.whatsapp.ariaLabel}
               >
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                  fill="currentColor"
                   className="w-4 h-4"
                   aria-hidden="true"
                 >
-                  <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                </svg>
+              </a>
+
+              {/* Snapchat */}
+              <a
+                href={SOCIAL_LINKS.snapchat.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 flex items-center justify-center rounded-full border border-onyx-700 text-onyx-300 hover:border-gold hover:text-gold transition-colors focus-visible:ring-2 focus-visible:ring-gold"
+                aria-label={SOCIAL_LINKS.snapchat.ariaLabel}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-4 h-4"
+                  aria-hidden="true"
+                >
+                  <path d="M12.206.793c.99 0 4.347.276 5.93 3.821.529 1.193.403 3.219.299 4.847l-.003.06c-.012.18-.022.345-.03.51.075.045.203.09.401.09.3-.016.659-.12 1.033-.301.165-.088.344-.104.464-.104.182 0 .359.029.509.09.45.149.734.479.734.838.015.449-.39.839-1.213 1.168-.089.029-.209.075-.344.119-.45.135-1.139.36-1.333.81-.09.224-.061.524.12.868l.015.015c.06.136 1.526 3.475 4.791 4.014.255.044.435.27.42.509 0 .075-.015.149-.045.225-.24.569-1.273.988-3.146 1.271-.059.091-.12.375-.164.57-.029.179-.074.36-.134.553-.076.271-.27.405-.555.405h-.03c-.135 0-.313-.031-.538-.074-.36-.075-.765-.135-1.273-.135-.3 0-.599.015-.913.074-.6.104-1.123.476-1.663.879-.615.45-1.245.93-2.08.93-.055 0-.109-.004-.165-.01h-.085c-.84 0-1.469-.48-2.085-.93-.539-.403-1.063-.775-1.662-.879a6.459 6.459 0 00-.913-.074c-.54 0-.959.075-1.274.135-.24.045-.419.074-.554.074-.299 0-.509-.148-.569-.42-.061-.192-.105-.359-.135-.553-.044-.195-.105-.48-.165-.571-1.873-.283-2.906-.702-3.145-1.271a.76.76 0 01-.046-.225c-.015-.239.166-.465.42-.509 3.266-.54 4.791-3.879 4.791-4.02l.016-.029c.18-.345.224-.645.119-.869-.195-.434-.884-.658-1.333-.809-.121-.045-.24-.09-.345-.119-1.107-.435-1.257-.93-1.197-1.273.09-.479.674-.793 1.168-.793.146 0 .27.029.383.074.42.194.789.3 1.083.3.24 0 .375-.06.45-.09l-.016-.06c-.104-1.574-.225-3.615.3-4.842C7.847 1.07 11.206.793 12.206.793z" />
                 </svg>
               </a>
             </div>
@@ -147,24 +164,36 @@ export function Footer() {
               <p>
                 <span className="sr-only">Email:</span>
                 <a
-                  href="mailto:hello@luxescentique.com"
+                  href={`mailto:${CONTACT_INFO.email}`}
                   className="hover:text-gold transition-colors focus-visible:ring-2 focus-visible:ring-gold rounded"
                   aria-label="Send us an email"
                 >
-                  hello@luxescentique.com
+                  {CONTACT_INFO.email}
                 </a>
               </p>
               <p>
                 <span className="sr-only">Phone:</span>
                 <a
-                  href="tel:+233000000000"
+                  href={CONTACT_INFO.phoneHref}
                   className="hover:text-gold transition-colors focus-visible:ring-2 focus-visible:ring-gold rounded"
                   aria-label="Call us"
                 >
-                  +233 00 000 0000
+                  {CONTACT_INFO.phoneDisplay}
                 </a>
               </p>
-              <p>Accra, Ghana</p>
+              <p>
+                <a
+                  href={`https://maps.google.com/?q=${CONTACT_INFO.address.mapsQuery}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-gold transition-colors focus-visible:ring-2 focus-visible:ring-gold rounded"
+                  aria-label="View our location on Google Maps (opens in new tab)"
+                >
+                  {CONTACT_INFO.address.street}
+                  <br />
+                  {CONTACT_INFO.address.city}, {CONTACT_INFO.address.country}
+                </a>
+              </p>
             </address>
 
             {/* Newsletter */}

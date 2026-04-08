@@ -6,6 +6,7 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { PaymentsService } from '../payments/payments.service';
+import { EmailService } from '../email/email.service';
 import {
   IOrder,
   OrderStatus,
@@ -54,6 +55,7 @@ export class OrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly paymentsService: PaymentsService,
+    private readonly emailService: EmailService,
   ) {}
 
   async create(dto: CreateOrderDto, customerId?: string): Promise<IOrder> {
@@ -104,7 +106,10 @@ export class OrdersService {
       });
     });
 
-    return this.mapOrder(order);
+    const mapped = this.mapOrder(order);
+    // Fire-and-forget — email must not block or fail the order response
+    void this.emailService.sendOrderConfirmation(mapped);
+    return mapped;
   }
 
   async createWalkIn(dto: CreateWalkInOrderDto): Promise<IOrder> {
@@ -178,7 +183,9 @@ export class OrdersService {
       data: { status: dto.status },
       include: ORDER_INCLUDE,
     });
-    return this.mapOrder(order);
+    const mapped = this.mapOrder(order);
+    void this.emailService.sendOrderStatusUpdate(mapped);
+    return mapped;
   }
 
   async markAsPaid(id: string, paymentRef: string): Promise<IOrder> {

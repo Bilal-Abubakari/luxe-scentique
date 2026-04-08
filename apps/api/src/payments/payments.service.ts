@@ -1,9 +1,10 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'node:crypto';
 import axios from 'axios';
 import { PrismaService } from '../prisma/prisma.service';
-import { IServiceFeeCalculation } from '@luxe-scentique/shared-types';
+import { EmailService } from '../email/email.service';
+import { IServiceFeeCalculation, OrderStatus, PaymentMethod } from '@luxe-scentique/shared-types';
 
 interface PaystackInitResponse {
   status: boolean;
@@ -46,6 +47,7 @@ export class PaymentsService {
   constructor(
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
+    private readonly emailService: EmailService,
   ) {}
 
   /**
@@ -101,6 +103,23 @@ export class PaymentsService {
     }
 
     return response.data.data;
+  }
+
+  /**
+   * Fetch an order, then initialize a Paystack transaction for it.
+   * Exposed as a dedicated method so the controller can call it without
+   * coupling the orders module to the payments module.
+   */
+  async initializeOrderPayment(orderId: string): Promise<PaystackInitResponse['data']> {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) throw new NotFoundException(`Order ${orderId} not found`);
+    if (order.isPaid) throw new BadRequestException('This order has already been paid');
+
+    return this.initializeTransaction({
+      email: order.customerEmail,
+      amount: order.total,
+      orderId: order.id,
+    });
   }
 
   async verifyTransaction(reference: string): Promise<PaystackVerifyResponse['data']> {
@@ -161,11 +180,41 @@ export class PaymentsService {
       return;
     }
 
-    await this.prisma.order.update({
+    const updatedOrder = await this.prisma.order.update({
       where: { id: orderId },
       data: { isPaid: true, paymentRef: reference, status: 'PROCESSING' },
+      include: { items: { include: { product: true } } },
     });
 
     this.logger.log(`Webhook: order ${orderId} marked as paid. ref=${reference}`);
+
+    // Send payment confirmation email (fire-and-forget)
+    void this.emailService.sendPaymentConfirmation({
+      id: updatedOrder.id,
+      orderNumber: updatedOrder.orderNumber,
+      customerId: updatedOrder.customerId,
+      customerEmail: updatedOrder.customerEmail,
+      customerPhone: updatedOrder.customerPhone,
+      customerName: updatedOrder.customerName,
+      items: updatedOrder.items.map((item) => ({
+        id: item.id,
+        productId: item.productId,
+        productTitle: item.product.title,
+        productImage: item.product.images[0] ?? null,
+        quantity: item.quantity,
+        price: item.price,
+        subtotal: item.price * item.quantity,
+      })),
+      subtotal: updatedOrder.subtotal,
+      serviceFee: updatedOrder.serviceFee,
+      total: updatedOrder.total,
+      status: OrderStatus.PROCESSING,
+      paymentMethod: updatedOrder.paymentMethod as PaymentMethod,
+      paymentRef: reference,
+      isPaid: true,
+      notes: updatedOrder.notes,
+      createdAt: updatedOrder.createdAt,
+      updatedAt: updatedOrder.updatedAt,
+    });
   }
 }

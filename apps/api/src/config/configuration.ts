@@ -38,6 +38,33 @@ export const configuration = () => ({
     },
   },
 
+  email: {
+    /**
+     * Which transport to use: "mailtrap" (default/dev) or "smtp" (production).
+     * Set EMAIL_PROVIDER=smtp and supply SMTP_* env vars to switch providers.
+     */
+    provider: process.env['EMAIL_PROVIDER'] ?? 'mailtrap',
+    from: {
+      name: process.env['EMAIL_FROM_NAME'] ?? 'Luxe Scentique',
+      address: process.env['EMAIL_FROM_ADDRESS'] ?? 'noreply@luxescentique.com',
+    },
+    /** Mailtrap sandbox — ideal for development and staging */
+    mailtrap: {
+      host: process.env['MAILTRAP_HOST'] ?? 'sandbox.smtp.mailtrap.io',
+      port: Number.parseInt(process.env['MAILTRAP_PORT'] ?? '2525', 10),
+      user: process.env['MAILTRAP_USER'] ?? '',
+      pass: process.env['MAILTRAP_PASS'] ?? '',
+    },
+    /** Generic SMTP — use for SendGrid, Mailgun, Postmark, AWS SES, etc. */
+    smtp: {
+      host: process.env['SMTP_HOST'] ?? '',
+      port: Number.parseInt(process.env['SMTP_PORT'] ?? '587', 10),
+      secure: process.env['SMTP_SECURE'] === 'true',
+      user: process.env['SMTP_USER'] ?? '',
+      pass: process.env['SMTP_PASS'] ?? '',
+    },
+  },
+
   superAdmin: {
     emails: (
       process.env['SUPER_ADMIN_EMAILS'] ??

@@ -6,6 +6,7 @@ import { Navbar } from '../components/layout/navbar';
 import { Footer } from '../components/layout/footer';
 import { CartProvider } from '../components/cart/cart-context';
 import { CartDrawer } from '../components/cart/cart-drawer';
+import { WhatsAppFloat } from '../components/ui/whatsapp-float';
 import './globals.css';
 
 const playfairDisplay = Playfair_Display({
@@ -103,6 +104,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
               <Footer />
             </footer>
           </div>
+          <WhatsAppFloat />
           </ThemeProvider>
         </CartProvider>
       </body>
