@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import {
   ApiTags,
   ApiOperation,
@@ -42,9 +43,11 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
+  @Throttle({ burst: { limit: 5, ttl: 1_000 }, sustained: { limit: 20, ttl: 60_000 } })
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new order (online checkout)' })
   @ApiResponse({ status: 201, description: 'Order created successfully' })
+  @ApiResponse({ status: 429, description: 'Too many requests — slow down and retry' })
   create(@Body() dto: CreateOrderDto, @Query('userId') userId?: string): Promise<IOrder> {
     return this.ordersService.create(dto, userId);
   }
@@ -61,9 +64,11 @@ export class OrdersController {
   }
 
   @Post('lookup')
+  @Throttle({ burst: { limit: 3, ttl: 1_000 }, sustained: { limit: 10, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Lookup orders by email, phone, or order number (no login required)' })
   @ApiResponse({ status: 200, description: 'Returns matching orders' })
+  @ApiResponse({ status: 429, description: 'Too many requests — slow down and retry' })
   lookup(@Body() dto: OrderLookupDto): Promise<IOrder[]> {
     return this.ordersService.lookup(dto);
   }

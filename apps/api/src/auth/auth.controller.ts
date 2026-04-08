@@ -7,6 +7,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Response, Request } from 'express';
@@ -25,9 +26,11 @@ export class AuthController {
   ) {}
 
   @Get('google')
+  @Throttle({ burst: { limit: 5, ttl: 1_000 }, sustained: { limit: 20, ttl: 60_000 } })
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Initiate Google OAuth login' })
   @ApiResponse({ status: 302, description: 'Redirects to Google OAuth consent screen' })
+  @ApiResponse({ status: 429, description: 'Too many requests — slow down and retry' })
   googleAuth(): void {
     // Guard redirects to Google
   }

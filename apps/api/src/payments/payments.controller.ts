@@ -12,6 +12,7 @@ import {
   Logger,
   RawBodyRequest,
 } from '@nestjs/common';
+import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiHeader } from '@nestjs/swagger';
 import { Request } from 'express';
 import { PaymentsService, PaystackWebhookEvent } from './payments.service';
@@ -34,19 +35,23 @@ export class PaymentsController {
   }
 
   @Post('initialize')
+  @Throttle({ burst: { limit: 5, ttl: 1_000 }, sustained: { limit: 10, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Initialize a Paystack transaction for an existing order' })
   @ApiResponse({ status: 200, description: 'Returns Paystack authorization URL and reference' })
-  @ApiResponse({ status: 404, description: 'Order not found' })
   @ApiResponse({ status: 400, description: 'Order already paid' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  @ApiResponse({ status: 429, description: 'Too many requests — slow down and retry' })
   initialize(@Body() dto: PaystackInitializeDto): Promise<{ authorization_url: string; access_code: string; reference: string }> {
     return this.paymentsService.initializeOrderPayment(dto.orderId);
   }
 
   @Post('verify')
+  @Throttle({ burst: { limit: 5, ttl: 1_000 }, sustained: { limit: 10, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Verify a Paystack transaction by reference' })
   @ApiResponse({ status: 200, description: 'Transaction verified' })
+  @ApiResponse({ status: 429, description: 'Too many requests — slow down and retry' })
   verify(@Body('reference') reference: string): Promise<unknown> {
     return this.paymentsService.verifyTransaction(reference);
   }
@@ -62,6 +67,7 @@ export class PaymentsController {
    * We verify the signature before processing.
    */
   @Post('webhook')
+  @SkipThrottle() // Paystack server IPs must never be rate-limited; endpoint is secured by HMAC-SHA512 signature verification
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Paystack webhook receiver (configure in Paystack dashboard)' })
   @ApiHeader({
