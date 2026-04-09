@@ -107,8 +107,9 @@ export class OrdersService {
     });
 
     const mapped = this.mapOrder(order);
-    // Fire-and-forget — email must not block or fail the order response
+    // Fire-and-forget — emails must not block or fail the order response
     void this.emailService.sendOrderConfirmation(mapped);
+    void this.emailService.sendAdminOrderNotification(mapped);
     return mapped;
   }
 

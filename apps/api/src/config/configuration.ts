@@ -63,6 +63,8 @@ export const configuration = () => ({
       user: process.env['SMTP_USER'] ?? '',
       pass: process.env['SMTP_PASS'] ?? '',
     },
+    /** Admin inbox that receives a notification every time a new order is placed. */
+    adminNotificationEmail: process.env['ADMIN_NOTIFICATION_EMAIL'] ?? 'luxescentique.parfum@gmail.com',
   },
 
   superAdmin: {

@@ -98,7 +98,7 @@ function BrandValues() {
           />
         </svg>
       ),
-      title: 'Free Shipping over GHS 500',
+      title: 'Free Shipping over GHS 1000',
       description:
         'Enjoy complimentary delivery on all orders above GHS 500. Your luxury fragrance arrives beautifully packaged at your door.',
     },

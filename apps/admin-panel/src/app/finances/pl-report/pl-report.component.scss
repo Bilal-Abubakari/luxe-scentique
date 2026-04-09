@@ -1,0 +1,48 @@
+.report-page { padding: 0; }
+.report-controls {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;
+  .controls-right { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+}
+.section-title { font-size: 1rem; font-weight: 600; color: var(--color-text-primary); margin: 0; display: flex; align-items: center; gap: 0.4rem; }
+.section-title i { color: var(--color-gold); }
+.summary-grid, .skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+.summary-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.2rem; border-top: 3px solid var(--color-border); transition: transform 0.2s, box-shadow 0.2s; }
+.summary-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+.summary-card.green { border-top-color: #2ecc71; }
+.summary-card.blue  { border-top-color: #3498db; }
+.summary-card.red   { border-top-color: #ff6b6b; }
+.card-label { font-size: 0.72rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.card-value { font-size: 1.35rem; font-weight: 700; color: var(--color-text-primary); }
+.card-sub { font-size: 0.72rem; color: var(--color-text-muted); }
+.chart-section { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; }
+.chart-title { font-size: 0.9rem; font-weight: 600; color: var(--color-text-secondary); margin: 0 0 1rem; display: flex; align-items: center; gap: 0.4rem; }
+.chart-title i { color: var(--color-gold); }
+.chart-container { height: 280px; }
+.empty-chart { height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; color: var(--color-text-muted); font-size: 0.875rem; }
+.breakdown-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.breakdown-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 1.25rem; }
+.breakdown-title { font-size: 0.9rem; font-weight: 600; color: var(--color-text-secondary); margin: 0 0 1rem; display: flex; align-items: center; gap: 0.4rem; }
+.breakdown-title i { color: var(--color-gold); }
+.category-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.category-row { display: flex; flex-direction: column; gap: 0.2rem; }
+.category-info { display: flex; justify-content: space-between; }
+.category-name { font-size: 0.825rem; color: var(--color-text-primary); }
+.category-pct  { font-size: 0.75rem; color: var(--color-text-muted); }
+.progress-bar-wrap { height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+.progress-bar { height: 100%; background: var(--color-gold); border-radius: 3px; max-width: 100%; }
+.category-amount { font-size: 0.8rem; color: #ff6b6b; font-weight: 600; text-align: right; }
+.pl-statement { display: flex; flex-direction: column; gap: 0.3rem; }
+.pl-section-title { font-size: 0.7rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.5rem; }
+.pl-row { display: flex; justify-content: space-between; align-items: center; padding: 0.3rem 0; font-size: 0.85rem; color: var(--color-text-secondary); }
+.pl-row.total { font-weight: 600; color: var(--color-text-primary); }
+.pl-row.net { font-size: 1rem; font-weight: 700; color: var(--color-text-primary); }
+.pl-value.green { color: #2ecc71; }
+.pl-value.red { color: #ff6b6b; }
+.pl-value { font-weight: 500; }
+.pl-divider { height: 1px; background: var(--color-border); margin: 0.5rem 0; }
+.no-data { text-align: center; padding: 4rem 2rem; display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+.no-data i { font-size: 3.5rem; color: var(--color-text-muted); opacity: 0.3; }
+.no-data h3 { color: var(--color-text-primary); margin: 0; font-size: 1.1rem; }
+.no-data p { color: var(--color-text-muted); margin: 0; font-size: 0.875rem; }
+:host ::ng-deep .period-select { min-width: 160px; }

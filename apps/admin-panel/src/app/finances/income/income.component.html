@@ -1,0 +1,139 @@
+<p-toast position="top-right" />
+<p-confirmDialog />
+
+<div class="income-page">
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <h2 class="section-title"><i class="pi pi-arrow-up-right"></i> Other Income</h2>
+      <span class="total-badge">{{ total() }} records · {{ fmt(totalAmount()) }} total</span>
+    </div>
+    <div class="toolbar-right">
+      <p-button label="Add Income" icon="pi pi-plus" (click)="openAddDialog()" size="small" severity="success" />
+    </div>
+  </div>
+
+  <div class="filters-bar">
+    <p-datepicker [(ngModel)]="filterStartDate" (ngModelChange)="applyFilters()" placeholder="From date" [showIcon]="true" dateFormat="yy-mm-dd" styleClass="filter-date" />
+    <p-datepicker [(ngModel)]="filterEndDate" (ngModelChange)="applyFilters()" placeholder="To date" [showIcon]="true" dateFormat="yy-mm-dd" styleClass="filter-date" />
+    <p-button icon="pi pi-times" label="Clear" severity="secondary" [outlined]="true" size="small" (click)="clearFilters()" />
+  </div>
+
+  <div class="table-card">
+    <p-table
+      [value]="isLoading() ? skeletonRows : incomes()"
+      [paginator]="true" [rows]="pageSize()" [totalRecords]="total()"
+      [lazy]="true" (onPage)="onPageChange($event)"
+      [rowsPerPageOptions]="[10, 15, 25, 50]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+      styleClass="p-datatable-sm income-table"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th scope="col">Title</th>
+          <th scope="col">Category</th>
+          <th scope="col">Source</th>
+          <th scope="col">Date</th>
+          <th scope="col" class="amount-col">Amount</th>
+          <th scope="col">Ref</th>
+          <th scope="col" class="actions-col">Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-row>
+        @if (isLoading()) {
+          <tr>
+            <td><p-skeleton height="1.5rem" borderRadius="6px"/></td>
+            <td><p-skeleton height="1.5rem" borderRadius="6px"/></td>
+            <td><p-skeleton height="1.5rem" borderRadius="6px"/></td>
+            <td><p-skeleton height="1.5rem" borderRadius="6px"/></td>
+            <td><p-skeleton height="1.5rem" borderRadius="6px"/></td>
+            <td><p-skeleton height="1.5rem" borderRadius="6px"/></td>
+            <td><p-skeleton height="1.5rem" borderRadius="6px"/></td>
+          </tr>
+        } @else {
+          <tr>
+            <td>
+              <div class="title-cell">
+                <span class="title-text">{{ row.title }}</span>
+                @if (row.description) { <span class="desc-text">{{ row.description }}</span> }
+              </div>
+            </td>
+            <td><p-tag [value]="getCategoryLabel(row.category)" [severity]="getCategorySeverity(row.category)" /></td>
+            <td class="muted-cell">{{ row.source || '—' }}</td>
+            <td class="muted-cell">{{ row.date | date:'MMM d, yyyy' }}</td>
+            <td class="amount-cell">{{ fmt(row.amount) }}</td>
+            <td class="muted-cell">{{ row.reference || '—' }}</td>
+            <td>
+              <div class="row-actions">
+                <p-button icon="pi pi-pencil" severity="secondary" [text]="true" size="small" (click)="openEditDialog(row)" pTooltip="Edit" />
+                <p-button icon="pi pi-trash" severity="danger" [text]="true" size="small" (click)="deleteIncome(row)" pTooltip="Delete" />
+              </div>
+            </td>
+          </tr>
+        }
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr><td colspan="7">
+          <div class="empty-state">
+            <i class="pi pi-plus-circle"></i>
+            <h3>No income entries found</h3>
+            <p>Record other income sources like investments, grants and refunds.</p>
+            <p-button label="Add Income" icon="pi pi-plus" size="small" severity="success" (click)="openAddDialog()" />
+          </div>
+        </td></tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<p-dialog [header]="dialogTitle" [(visible)]="showDialog" [modal]="true" [style]="{ width: '500px', maxWidth: '95vw' }" [draggable]="false" styleClass="income-dialog">
+  <form [formGroup]="form" class="income-form" (ngSubmit)="saveIncome()">
+    <div class="form-row">
+      <div class="form-field full">
+        <label for="income-title">Title <span class="required">*</span></label>
+        <input id="income-title" pInputText formControlName="title" placeholder="e.g., Investor capital injection" [class.ng-invalid]="isFieldInvalid('title')" />
+        @if (isFieldInvalid('title')) { <small class="error-msg">Title is required</small> }
+      </div>
+    </div>
+    <div class="form-row two-col">
+      <div class="form-field">
+        <label for="income-amount">Amount (GHS) <span class="required">*</span></label>
+        <p-inputnumber inputId="income-amount" formControlName="amount" [minFractionDigits]="2" [maxFractionDigits]="2" placeholder="0.00" [min]="0.01" styleClass="full-width" [class.ng-invalid]="isFieldInvalid('amount')" />
+        @if (isFieldInvalid('amount')) { <small class="error-msg">Valid amount required</small> }
+      </div>
+      <div class="form-field">
+        <label for="income-category">Category <span class="required">*</span></label>
+        <p-select inputId="income-category" formControlName="category" [options]="categoryOptions" optionLabel="label" optionValue="value" placeholder="Select type" styleClass="full-width" [class.ng-invalid]="isFieldInvalid('category')" />
+        @if (isFieldInvalid('category')) { <small class="error-msg">Category is required</small> }
+      </div>
+    </div>
+    <div class="form-row two-col">
+      <div class="form-field">
+        <label for="income-date">Date <span class="required">*</span></label>
+        <p-datepicker inputId="income-date" formControlName="date" dateFormat="yy-mm-dd" [showIcon]="true" styleClass="full-width" [class.ng-invalid]="isFieldInvalid('date')" />
+        @if (isFieldInvalid('date')) { <small class="error-msg">Date is required</small> }
+      </div>
+      <div class="form-field">
+        <label for="income-source">Source / From</label>
+        <input id="income-source" pInputText formControlName="source" placeholder="e.g., Bank, Investor name" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field full">
+        <label for="income-reference">Reference</label>
+        <input id="income-reference" pInputText formControlName="reference" placeholder="Transaction ref, receipt #..." />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field full">
+        <label for="income-description">Description</label>
+        <textarea id="income-description" pTextarea formControlName="description" rows="3" placeholder="Additional notes..."></textarea>
+      </div>
+    </div>
+  </form>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" severity="secondary" [outlined]="true" (click)="showDialog.set(false)" [disabled]="isSaving()" />
+    <p-button [label]="editingId() ? 'Save Changes' : 'Record Income'" severity="success" [icon]="isSaving() ? 'pi pi-spinner pi-spin' : 'pi pi-check'" (click)="saveIncome()" [loading]="isSaving()" />
+  </ng-template>
+</p-dialog>
+

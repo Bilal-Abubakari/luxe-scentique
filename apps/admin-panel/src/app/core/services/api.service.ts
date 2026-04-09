@@ -6,11 +6,20 @@ import type {
   IPerfume,
   IPerfumePaginated,
   IOrder,
+  IExpense,
+  IOtherIncome,
+  IFinancialSummary,
+  ICashFlowEntry,
+  IPLReport,
 } from '@luxe-scentique/shared-types';
 import type {
   CreateProductDto,
   UpdateProductDto,
   CreateWalkInOrderDto,
+  CreateExpenseDto,
+  UpdateExpenseDto,
+  CreateOtherIncomeDto,
+  UpdateOtherIncomeDto,
 } from '@luxe-scentique/shared-types/dtos';
 import { environment } from '../../../environments/environment';
 
@@ -43,6 +52,16 @@ export interface ProductQueryParams {
   isActive?: boolean;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+}
+
+export interface FinanceQueryParams {
+  [key: string]: UnknownKeys;
+  startDate?: string;
+  endDate?: string;
+  period?: string;
+  category?: string;
+  page?: number;
+  limit?: number;
 }
 
 const API_BASE = environment.apiBase;
@@ -134,6 +153,80 @@ export class ApiService {
         };
       })
     );
+  }
+
+  // ============================================================
+  // Finance — Expenses
+  // ============================================================
+
+  getExpenses(query?: FinanceQueryParams): Observable<{ data: IExpense[]; total: number }> {
+    return this.http.get<{ data: IExpense[]; total: number }>(`${API_BASE}/finance/expenses`, {
+      params: this.buildHttpParams(query),
+    });
+  }
+
+  getExpense(id: string): Observable<IExpense> {
+    return this.http.get<IExpense>(`${API_BASE}/finance/expenses/${id}`);
+  }
+
+  createExpense(dto: CreateExpenseDto): Observable<IExpense> {
+    return this.http.post<IExpense>(`${API_BASE}/finance/expenses`, dto);
+  }
+
+  updateExpense(id: string, dto: UpdateExpenseDto): Observable<IExpense> {
+    return this.http.patch<IExpense>(`${API_BASE}/finance/expenses/${id}`, dto);
+  }
+
+  deleteExpense(id: string): Observable<void> {
+    return this.http.delete<void>(`${API_BASE}/finance/expenses/${id}`);
+  }
+
+  // ============================================================
+  // Finance — Other Income
+  // ============================================================
+
+  getOtherIncome(query?: FinanceQueryParams): Observable<{ data: IOtherIncome[]; total: number }> {
+    return this.http.get<{ data: IOtherIncome[]; total: number }>(`${API_BASE}/finance/income`, {
+      params: this.buildHttpParams(query),
+    });
+  }
+
+  getOneOtherIncome(id: string): Observable<IOtherIncome> {
+    return this.http.get<IOtherIncome>(`${API_BASE}/finance/income/${id}`);
+  }
+
+  createOtherIncome(dto: CreateOtherIncomeDto): Observable<IOtherIncome> {
+    return this.http.post<IOtherIncome>(`${API_BASE}/finance/income`, dto);
+  }
+
+  updateOtherIncome(id: string, dto: UpdateOtherIncomeDto): Observable<IOtherIncome> {
+    return this.http.patch<IOtherIncome>(`${API_BASE}/finance/income/${id}`, dto);
+  }
+
+  deleteOtherIncome(id: string): Observable<void> {
+    return this.http.delete<void>(`${API_BASE}/finance/income/${id}`);
+  }
+
+  // ============================================================
+  // Finance — Analytics
+  // ============================================================
+
+  getFinancialSummary(query?: FinanceQueryParams): Observable<IFinancialSummary> {
+    return this.http.get<IFinancialSummary>(`${API_BASE}/finance/summary`, {
+      params: this.buildHttpParams(query),
+    });
+  }
+
+  getCashFlow(query?: FinanceQueryParams): Observable<ICashFlowEntry[]> {
+    return this.http.get<ICashFlowEntry[]>(`${API_BASE}/finance/cashflow`, {
+      params: this.buildHttpParams(query),
+    });
+  }
+
+  getPLReport(query?: FinanceQueryParams): Observable<IPLReport> {
+    return this.http.get<IPLReport>(`${API_BASE}/finance/pl-report`, {
+      params: this.buildHttpParams(query),
+    });
   }
 
   private buildHttpParams(query?: Record<string, string | number | boolean | undefined>): HttpParams {

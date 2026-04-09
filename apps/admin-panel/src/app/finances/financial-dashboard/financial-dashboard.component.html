@@ -1,0 +1,190 @@
+<div class="fin-dashboard">
+
+  <!-- Period Selector -->
+  <div class="dashboard-controls">
+    <div class="controls-left">
+      <h2 class="section-title">Financial Overview</h2>
+    </div>
+    <div class="controls-right">
+      <p-select
+        [options]="periodOptions"
+        [(ngModel)]="selectedPeriod"
+        optionLabel="label"
+        optionValue="value"
+        (onChange)="onPeriodChange($event.value)"
+        placeholder="Select Period"
+        styleClass="period-select"
+      />
+      <p-button
+        icon="pi pi-refresh"
+        (click)="loadData()"
+        [loading]="isLoading()"
+        severity="secondary"
+        [outlined]="true"
+        size="small"
+        pTooltip="Refresh data"
+      />
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  @if (isLoading()) {
+    <div class="kpi-grid">
+      @for (i of [1,2,3,4,5,6]; track i) {
+        <div class="kpi-card skeleton-card">
+          <p-skeleton height="80px" borderRadius="12px" />
+        </div>
+      }
+    </div>
+  } @else if (summary()) {
+    <div class="kpi-grid">
+
+      <div class="kpi-card revenue">
+        <div class="kpi-icon"><i class="pi pi-arrow-up-right"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-label">Total Revenue</span>
+          <span class="kpi-value">{{ fmt(summary()!.totalRevenue) }}</span>
+          <span class="kpi-sub">Sales + Other income</span>
+        </div>
+      </div>
+
+      <div class="kpi-card sales">
+        <div class="kpi-icon"><i class="pi pi-shopping-bag"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-label">Sales Revenue</span>
+          <span class="kpi-value">{{ fmt(summary()!.salesRevenue) }}</span>
+          <span class="kpi-sub">Paid orders</span>
+        </div>
+      </div>
+
+      <div class="kpi-card other-income">
+        <div class="kpi-icon"><i class="pi pi-plus-circle"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-label">Other Income</span>
+          <span class="kpi-value">{{ fmt(summary()!.otherIncome) }}</span>
+          <span class="kpi-sub">Investments, grants, etc.</span>
+        </div>
+      </div>
+
+      <div class="kpi-card expenses">
+        <div class="kpi-icon"><i class="pi pi-arrow-down-right"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-label">Total Expenses</span>
+          <span class="kpi-value">{{ fmt(summary()!.totalExpenses) }}</span>
+          <span class="kpi-sub">All recorded costs</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" [ngClass]="profitClass">
+        <div class="kpi-icon"><i [class]="profitIcon"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-label">Net Profit / Loss</span>
+          <span class="kpi-value">{{ fmt(summary()!.netProfit) }}</span>
+          <span class="kpi-sub">Revenue − Expenses</span>
+        </div>
+      </div>
+
+      <div class="kpi-card margin">
+        <div class="kpi-icon"><i class="pi pi-percentage"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-label">Profit Margin</span>
+          <span class="kpi-value">{{ summary()!.profitMargin | number:'1.1-1' }}%</span>
+          <span class="kpi-sub">Net profit / Revenue</span>
+        </div>
+      </div>
+
+    </div>
+  }
+
+  <!-- Charts Row -->
+  <div class="charts-row">
+
+    <!-- Cash Flow Chart -->
+    <div class="chart-card wide">
+      <div class="chart-header">
+        <h3 class="chart-title"><i class="pi pi-chart-line"></i> Cash Flow</h3>
+      </div>
+      @if (isLoading()) {
+        <p-skeleton height="260px" borderRadius="10px" />
+      } @else if (cashFlowChartData()) {
+        <div class="chart-container">
+          <p-chart type="line" [data]="cashFlowChartData()" [options]="chartOptions()" height="260px" />
+        </div>
+      } @else {
+        <div class="empty-chart"><i class="pi pi-chart-line"></i><span>No data for this period</span></div>
+      }
+    </div>
+
+    <!-- Expense Breakdown Pie -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3 class="chart-title"><i class="pi pi-chart-pie"></i> Expenses by Category</h3>
+      </div>
+      @if (isLoading()) {
+        <p-skeleton height="260px" borderRadius="10px" />
+      } @else if (expensePieData()) {
+        <div class="chart-container">
+          <p-chart type="doughnut" [data]="expensePieData()" [options]="pieOptions()" height="260px" />
+        </div>
+      } @else {
+        <div class="empty-chart"><i class="pi pi-chart-pie"></i><span>No expenses recorded</span></div>
+      }
+    </div>
+
+  </div>
+
+  <!-- Bottom Row: Top Expenses + Recent Activity -->
+  <div class="bottom-row">
+
+    <!-- Top Expenses -->
+    <div class="data-card">
+      <h3 class="data-card-title"><i class="pi pi-arrow-down-right"></i> Top Expenses</h3>
+      @if (isLoading()) {
+        @for (i of [1,2,3,4,5]; track i) {
+          <p-skeleton height="40px" styleClass="mb-2" borderRadius="8px" />
+        }
+      } @else if (report()?.topExpenses?.length) {
+        <div class="data-list">
+          @for (exp of report()!.topExpenses; track exp.id) {
+            <div class="data-row">
+              <div class="data-row-left">
+                <span class="data-row-title">{{ exp.title }}</span>
+                <span class="data-row-meta">{{ exp.category | titlecase }} · {{ exp.date | date:'MMM d' }}</span>
+              </div>
+              <span class="data-row-amount expense">−{{ fmt(exp.amount) }}</span>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="empty-list"><i class="pi pi-inbox"></i> No expenses recorded</div>
+      }
+    </div>
+
+    <!-- Recent Income -->
+    <div class="data-card">
+      <h3 class="data-card-title"><i class="pi pi-plus-circle"></i> Recent Income</h3>
+      @if (isLoading()) {
+        @for (i of [1,2,3,4,5]; track i) {
+          <p-skeleton height="40px" styleClass="mb-2" borderRadius="8px" />
+        }
+      } @else if (report()?.recentIncome?.length) {
+        <div class="data-list">
+          @for (inc of report()!.recentIncome; track inc.id) {
+            <div class="data-row">
+              <div class="data-row-left">
+                <span class="data-row-title">{{ inc.title }}</span>
+                <span class="data-row-meta">{{ inc.category | titlecase }} · {{ inc.date | date:'MMM d' }}</span>
+              </div>
+              <span class="data-row-amount income">+{{ fmt(inc.amount) }}</span>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="empty-list"><i class="pi pi-inbox"></i> No income recorded</div>
+      }
+    </div>
+
+  </div>
+
+</div>
+

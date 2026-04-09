@@ -1,0 +1,169 @@
+<div class="report-page">
+
+  <!-- Controls -->
+  <div class="report-controls">
+    <div class="controls-left">
+      <h2 class="section-title"><i class="pi pi-file-export"></i> Profit &amp; Loss Report</h2>
+    </div>
+    <div class="controls-right">
+      <p-select
+        [options]="presets"
+        [(ngModel)]="selectedPreset"
+        optionLabel="label"
+        optionValue="value"
+        (onChange)="applyPreset($event.value)"
+        placeholder="Select period"
+        styleClass="period-select"
+      />
+      @if (selectedPreset() === 'custom') {
+        <p-datepicker [(ngModel)]="startDate" placeholder="From" [showIcon]="true" dateFormat="yy-mm-dd" styleClass="date-input" />
+        <p-datepicker [(ngModel)]="endDate" placeholder="To" [showIcon]="true" dateFormat="yy-mm-dd" styleClass="date-input" />
+        <p-button label="Generate" icon="pi pi-play" size="small" (click)="loadReport()" [loading]="isLoading()" />
+      }
+      <p-button
+        icon="pi pi-download"
+        label="Export CSV"
+        severity="secondary"
+        [outlined]="true"
+        size="small"
+        (click)="exportCSV()"
+        [disabled]="!report() || isLoading()"
+      />
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="skeleton-grid">
+      @for (i of [1,2,3,4]; track i) { <p-skeleton height="100px" borderRadius="12px" /> }
+    </div>
+    <p-skeleton height="280px" borderRadius="12px" styleClass="mt-4" />
+  } @else if (report()) {
+
+    <!-- Summary Cards -->
+    <div class="summary-grid">
+      <div class="summary-card green">
+        <span class="card-label">Total Revenue</span>
+        <span class="card-value">{{ fmt(report()!.summary.totalRevenue) }}</span>
+        <span class="card-sub">Sales + Other income</span>
+      </div>
+      <div class="summary-card blue">
+        <span class="card-label">Sales Revenue</span>
+        <span class="card-value">{{ fmt(report()!.summary.salesRevenue) }}</span>
+        <span class="card-sub">Paid orders only</span>
+      </div>
+      <div class="summary-card red">
+        <span class="card-label">Total Expenses</span>
+        <span class="card-value">{{ fmt(report()!.summary.totalExpenses) }}</span>
+        <span class="card-sub">All cost categories</span>
+      </div>
+      <div class="summary-card" [ngStyle]="{ 'border-top-color': profitColor(report()!.summary.netProfit) }">
+        <span class="card-label">Net Profit / Loss</span>
+        <span class="card-value" [ngStyle]="{ color: profitColor(report()!.summary.netProfit) }">
+          {{ fmt(report()!.summary.netProfit) }}
+        </span>
+        <span class="card-sub profit-margin">
+          <i [class]="report()!.summary.netProfit >= 0 ? 'pi pi-trending-up' : 'pi pi-trending-down'"></i>
+          {{ pct(report()!.summary.profitMargin) }} margin
+        </span>
+      </div>
+    </div>
+
+    <!-- Revenue vs Expenses Bar Chart -->
+    <div class="chart-section">
+      <h3 class="chart-title"><i class="pi pi-chart-bar"></i> Revenue vs Expenses Over Time</h3>
+      @if (barChartData() && report()!.cashFlow.length > 0) {
+        <div class="chart-container">
+          <p-chart type="bar" [data]="barChartData()" [options]="barChartOptions()" height="280px" />
+        </div>
+      } @else {
+        <div class="empty-chart"><i class="pi pi-chart-bar"></i><span>No cash flow data for this period</span></div>
+      }
+    </div>
+
+    <!-- Two-column breakdown -->
+    <div class="breakdown-row">
+
+      <!-- Expenses by Category -->
+      <div class="breakdown-card">
+        <h3 class="breakdown-title"><i class="pi pi-list"></i> Expenses by Category</h3>
+        @if (report()!.expensesByCategory.length > 0) {
+          <div class="category-list">
+            @for (cat of report()!.expensesByCategory; track cat.category) {
+              <div class="category-row">
+                <div class="category-info">
+                  <span class="category-name">{{ cat.label }}</span>
+                  <span class="category-pct">{{ pct(cat.percentage) }}</span>
+                </div>
+                <div class="progress-bar-wrap">
+                  <div class="progress-bar" [style.width]="pct(cat.percentage)"></div>
+                </div>
+                <span class="category-amount">{{ fmt(cat.amount) }}</span>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="empty-state"><i class="pi pi-inbox"></i> No expenses in this period</div>
+        }
+      </div>
+
+      <!-- P&L Statement -->
+      <div class="breakdown-card">
+        <h3 class="breakdown-title"><i class="pi pi-calculator"></i> P&amp;L Statement</h3>
+        <div class="pl-statement">
+          <div class="pl-section-title">INCOME</div>
+          <div class="pl-row">
+            <span>Sales Revenue</span>
+            <span class="pl-value green">{{ fmt(report()!.summary.salesRevenue) }}</span>
+          </div>
+          <div class="pl-row">
+            <span>Other Income</span>
+            <span class="pl-value green">{{ fmt(report()!.summary.otherIncome) }}</span>
+          </div>
+          <div class="pl-row total">
+            <span>Total Revenue</span>
+            <span class="pl-value green">{{ fmt(report()!.summary.totalRevenue) }}</span>
+          </div>
+
+          <div class="pl-divider"></div>
+
+          <div class="pl-section-title">EXPENSES</div>
+          @for (cat of report()!.expensesByCategory; track cat.category) {
+            <div class="pl-row">
+              <span>{{ cat.label }}</span>
+              <span class="pl-value red">{{ fmt(cat.amount) }}</span>
+            </div>
+          }
+          <div class="pl-row total">
+            <span>Total Expenses</span>
+            <span class="pl-value red">{{ fmt(report()!.summary.totalExpenses) }}</span>
+          </div>
+
+          <div class="pl-divider thick"></div>
+
+          <div class="pl-row net">
+            <span>NET PROFIT / LOSS</span>
+            <span class="pl-value" [ngStyle]="{ color: profitColor(report()!.summary.netProfit) }">
+              {{ fmt(report()!.summary.netProfit) }}
+            </span>
+          </div>
+          <div class="pl-row margin-row">
+            <span>Profit Margin</span>
+            <span class="pl-value" [ngStyle]="{ color: profitColor(report()!.summary.netProfit) }">
+              {{ pct(report()!.summary.profitMargin) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  } @else {
+    <div class="no-data">
+      <i class="pi pi-file-edit"></i>
+      <h3>Select a period to generate the report</h3>
+      <p>Choose a date range above to view your profit &amp; loss statement.</p>
+    </div>
+  }
+
+</div>
+

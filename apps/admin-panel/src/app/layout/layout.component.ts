@@ -59,6 +59,12 @@ export class LayoutComponent {
       route: '/pos',
       ariaLabel: 'Navigate to Point of Sale',
     },
+    {
+      label: 'Finance',
+      icon: 'pi pi-wallet',
+      route: '/finances',
+      ariaLabel: 'Navigate to Finance & Accounting',
+    },
   ];
 
   @HostListener('window:resize', ['$event'])

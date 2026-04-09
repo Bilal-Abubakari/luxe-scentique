@@ -6,17 +6,22 @@ import { orderConfirmationTemplate } from './templates/order-confirmation.templa
 import { paymentConfirmedTemplate } from './templates/payment-confirmed.template';
 import { orderStatusUpdateTemplate } from './templates/order-status-update.template';
 import { orderCancelledTemplate } from './templates/order-cancelled.template';
+import { adminOrderNotificationTemplate } from './templates/admin-order-notification.template';
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private readonly frontendUrl: string;
+  private readonly adminUrl: string;
+  private readonly adminNotificationEmail: string;
 
   constructor(
     @Inject(EMAIL_PROVIDER) private readonly provider: IEmailProvider,
     private readonly config: ConfigService,
   ) {
     this.frontendUrl = config.get<string>('frontendUrl') ?? 'http://localhost:3000';
+    this.adminUrl = config.get<string>('adminUrl') ?? 'http://localhost:4201';
+    this.adminNotificationEmail = config.get<string>('email.adminNotificationEmail') ?? 'luxescentique.parfum@gmail.com';
   }
 
   /**
@@ -90,6 +95,25 @@ export class EmailService {
           html: orderStatusUpdateTemplate({
             order,
             trackOrderUrl: this.orderTrackUrl(order.orderNumber),
+          }),
+        }),
+    );
+  }
+
+  /**
+   * Sent to the admin inbox immediately after a new order is placed.
+   * Includes full order details and a direct link to the admin dashboard.
+   */
+  async sendAdminOrderNotification(order: IOrder): Promise<void> {
+    await this.safeSend(
+      `sendAdminOrderNotification [${order.orderNumber}]`,
+      () =>
+        this.provider.send({
+          to: this.adminNotificationEmail,
+          subject: `🛒 New Order — ${order.orderNumber} | ${order.customerName ?? order.customerEmail}`,
+          html: adminOrderNotificationTemplate({
+            order,
+            adminOrderUrl: `${this.adminUrl}/orders`,
           }),
         }),
     );

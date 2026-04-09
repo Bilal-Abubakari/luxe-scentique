@@ -14,7 +14,7 @@ import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
-import { IAuthUser, IUser } from '@luxe-scentique/shared-types';
+import { IAuthUser, IUser, Role } from '@luxe-scentique/shared-types';
 import { ConfigService } from '@nestjs/config';
 
 @ApiTags('auth')
@@ -44,10 +44,13 @@ export class AuthController {
     @Res() res: Response,
   ): void {
     const { accessToken } = this.authService.generateTokens(req.user);
-    const frontendUrl = this.configService.get<string>('frontendUrl') ?? 'http://localhost:4200';
 
-    // Redirect storefront with token in query param (storefront stores it)
-    res.redirect(`${frontendUrl}/auth/callback?token=${accessToken}`);
+    const isAdmin = req.user.role === Role.ADMIN || req.user.role === Role.SUPER_ADMIN;
+    const baseUrl = isAdmin
+      ? (this.configService.get<string>('adminUrl') ?? 'http://localhost:4201')
+      : (this.configService.get<string>('frontendUrl') ?? 'http://localhost:4200');
+
+    res.redirect(`${baseUrl}/auth/callback?token=${accessToken}`);
   }
 
   @Get('me')

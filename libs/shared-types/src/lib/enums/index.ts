@@ -42,3 +42,34 @@ export enum NotificationType {
   SMS = 'SMS',
   PUSH = 'PUSH',
 }
+
+export enum ExpenseCategory {
+  INVENTORY_PURCHASE = 'INVENTORY_PURCHASE',
+  SALARY = 'SALARY',
+  RENT = 'RENT',
+  UTILITIES = 'UTILITIES',
+  MARKETING = 'MARKETING',
+  SUPPLIES = 'SUPPLIES',
+  TRANSPORT = 'TRANSPORT',
+  MAINTENANCE = 'MAINTENANCE',
+  TAX = 'TAX',
+  INSURANCE = 'INSURANCE',
+  OTHER = 'OTHER',
+}
+
+export enum IncomeCategory {
+  INVESTMENT = 'INVESTMENT',
+  LOAN = 'LOAN',
+  GRANT = 'GRANT',
+  REFUND = 'REFUND',
+  COMMISSION = 'COMMISSION',
+  OTHER = 'OTHER',
+}
+
+export enum FinancialPeriod {
+  DAILY = 'DAILY',
+  WEEKLY = 'WEEKLY',
+  MONTHLY = 'MONTHLY',
+  YEARLY = 'YEARLY',
+}
+

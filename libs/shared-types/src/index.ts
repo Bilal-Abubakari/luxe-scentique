@@ -5,3 +5,4 @@ export * from './lib/enums';
 export * from './lib/interfaces/perfume.interface';
 export * from './lib/interfaces/order.interface';
 export * from './lib/interfaces/user.interface';
+export * from './lib/interfaces/finance.interface';

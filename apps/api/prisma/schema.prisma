@@ -114,3 +114,61 @@ enum PaymentMethod {
   ONLINE
   WALK_IN
 }
+
+// ─── Finance ─────────────────────────────────────────────────────────────────
+
+model Expense {
+  id          String          @id @default(cuid())
+  title       String
+  amount      Float
+  category    ExpenseCategory
+  date        DateTime
+  vendor      String?
+  description String?
+  reference   String?
+  receiptUrl  String?
+  recordedBy  String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@map("expenses")
+}
+
+model OtherIncome {
+  id          String         @id @default(cuid())
+  title       String
+  amount      Float
+  category    IncomeCategory
+  date        DateTime
+  source      String?
+  description String?
+  reference   String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@map("other_income")
+}
+
+enum ExpenseCategory {
+  INVENTORY_PURCHASE
+  SALARY
+  RENT
+  UTILITIES
+  MARKETING
+  SUPPLIES
+  TRANSPORT
+  MAINTENANCE
+  TAX
+  INSURANCE
+  OTHER
+}
+
+enum IncomeCategory {
+  INVESTMENT
+  LOAN
+  GRANT
+  REFUND
+  COMMISSION
+  OTHER
+}
+
