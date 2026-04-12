@@ -178,12 +178,28 @@ export class OrdersService {
   }
 
   async updateStatus(id: string, dto: UpdateOrderStatusDto): Promise<IOrder> {
-    await this.findOne(id);
-    const order = await this.prisma.order.update({
-      where: { id },
-      data: { status: dto.status },
-      include: ORDER_INCLUDE,
+    const existing = await this.findOne(id);
+
+    const order = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      if (
+        dto.status === OrderStatus.CANCELLED &&
+        existing.status !== OrderStatus.CANCELLED
+      ) {
+        for (const item of existing.items) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stock: { increment: item.quantity } },
+          });
+        }
+      }
+
+      return tx.order.update({
+        where: { id },
+        data: { status: dto.status },
+        include: ORDER_INCLUDE,
+      });
     });
+
     const mapped = this.mapOrder(order);
     void this.emailService.sendOrderStatusUpdate(mapped);
     return mapped;

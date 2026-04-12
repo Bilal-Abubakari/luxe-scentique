@@ -83,6 +83,15 @@ export class ProductsController {
     return this.productsService.findAll(query);
   }
 
+  @Get('featured')
+  @ApiOperation({ summary: 'Get featured products ranked by purchase frequency (last 90 days)' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of products to return (1–20, default 6)' })
+  @ApiResponse({ status: 200, description: 'Returns featured products sorted by sales rank, padded with newest products' })
+  getFeatured(@Query('limit') limit?: string): Promise<IPerfume[]> {
+    const n = Math.min(Math.max(parseInt(limit ?? '6', 10) || 6, 1), 20);
+    return this.productsService.getFeatured(n);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a single perfume by ID' })
   @ApiParam({ name: 'id', description: 'Product ID' })

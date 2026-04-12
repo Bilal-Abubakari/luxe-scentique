@@ -87,6 +87,16 @@ export async function getProducts(query: ProductQueryDto = {}): Promise<IPerfume
 }
 
 /**
+ * Fetch featured products ranked by purchase frequency (last 90 days).
+ * Falls back to newest active products when sales data is sparse.
+ */
+export async function getFeaturedProducts(limit = 6): Promise<IPerfume[]> {
+  return request<IPerfume[]>(`/products/featured?limit=${limit}`, {
+    next: { revalidate: 300 }, // 5-minute cache — rankings shift slowly
+  });
+}
+
+/**
  * Fetch a single product by its ID.
  */
 export async function getProduct(id: string): Promise<IPerfume> {

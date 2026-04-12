@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getProduct } from '../../../lib/api';
+import { getProduct, getProducts, getFeaturedProducts } from '../../../lib/api';
 import { formatPrice } from '../../../lib/utils';
 import { ProductImageGallery } from '../../../components/products/product-image-gallery';
 import { AddToCartSection } from '../../../components/products/add-to-cart-section';
+import { ProductCard } from '../../../components/products/product-card';
 
 const SERVICE_FEE_RATE = 0.0195;
 const SERVICE_FEE_CAP = 1000;
@@ -54,6 +55,26 @@ export default async function ProductDetailPage({ params }: PageProps) {
   } catch {
     notFound();
   }
+
+  // Fetch related products in parallel: same vibe + featured fallback
+  const [vibeData, featured] = await Promise.all([
+    product.vibe
+      ? getProducts({ vibe: product.vibe, limit: 5 }).catch(() => null)
+      : Promise.resolve(null),
+    getFeaturedProducts(8).catch(() => []),
+  ]);
+
+  const vibeMatches = (vibeData?.data ?? []).filter((p) => p.id !== id);
+  const seen = new Set(vibeMatches.map((p) => p.id));
+  const featuredPad = (featured as typeof vibeMatches)
+    .filter((p) => p.id !== id && !seen.has(p.id));
+  const relatedProducts = [...vibeMatches, ...featuredPad].slice(0, 4);
+  const relatedLabel = product.vibe
+    ? `More ${product.vibe.charAt(0) + product.vibe.slice(1).toLowerCase()} Fragrances`
+    : 'You May Also Like';
+  const relatedHref = product.vibe
+    ? `/shop?vibe=${encodeURIComponent(product.vibe)}`
+    : '/shop';
 
   const fee = calcFee(product.price);
   const total = product.price + fee;
@@ -143,6 +164,14 @@ export default async function ProductDetailPage({ params }: PageProps) {
               />
               {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
             </p>
+            {product.stock > 0 && (
+              <p className="text-xs font-medium flex items-center gap-1.5 text-onyx-500 border-t border-onyx-100 pt-2 mt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5 text-gold flex-shrink-0" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Delivered within <strong className="text-onyx ml-1">24 hours</strong>
+              </p>
+            )}
           </div>
 
           {/* Add to Cart */}
@@ -252,6 +281,57 @@ export default async function ProductDetailPage({ params }: PageProps) {
           </div>
         </div>
       </div>
+
+      {/* Related Products */}
+      {relatedProducts.length > 0 && (
+        <section className="mt-20 pt-12 border-t border-onyx-100" aria-labelledby="related-heading">
+          <div className="flex items-end justify-between gap-4 mb-8">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-gold mb-1">
+                You May Also Like
+              </p>
+              <h2
+                id="related-heading"
+                className="font-display text-display-sm text-onyx leading-tight"
+              >
+                {relatedLabel}
+              </h2>
+            </div>
+            <Link
+              href={relatedHref}
+              className="hidden sm:inline-flex items-center gap-1.5 text-sm text-onyx-400 hover:text-gold transition-colors font-medium shrink-0"
+            >
+              View all
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-4 h-4"
+                aria-hidden="true"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
+            {relatedProducts.map((related) => (
+              <ProductCard key={related.id} product={related} />
+            ))}
+          </div>
+
+          <div className="mt-6 sm:hidden">
+            <Link
+              href={relatedHref}
+              className="btn-outline-gold inline-flex items-center gap-2 text-sm w-full justify-center"
+            >
+              View all {relatedLabel.toLowerCase()}
+            </Link>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

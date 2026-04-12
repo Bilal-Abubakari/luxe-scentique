@@ -1,15 +1,14 @@
 import { Suspense } from 'react';
 import { HeroSection } from '../components/hero/hero-section';
 import { ProductGrid } from '../components/products/product-grid';
-import { getProducts } from '../lib/api';
+import { getFeaturedProducts } from '../lib/api';
 import { IPerfume } from '@luxe-scentique/shared-types';
 import { SOCIAL_LINKS, CONTACT_INFO } from '../lib/constants';
 
 async function FeaturedProductsGrid() {
   let products: IPerfume[] = [];
   try {
-    const result = await getProducts({ limit: 6, isActive: true, page: 1 });
-    products = result.data;
+    products = await getFeaturedProducts(6);
   } catch (error) {
     console.error('Failed to fetch featured products:', error);
   }
@@ -124,6 +123,28 @@ function BrandValues() {
       description:
         'We guarantee 100% authentic products. Each bottle comes with a certificate of authenticity, backed by our personal promise.',
     },
+    {
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="w-8 h-8"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      ),
+      title: '24-Hour Delivery',
+      description:
+        'Order today and receive your luxury fragrance within 24 hours. We move fast so your signature scent reaches you without the wait.',
+    },
   ];
 
   return (
@@ -144,7 +165,7 @@ function BrandValues() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {values.map((value) => (
             <article
               key={value.title}

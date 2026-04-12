@@ -435,6 +435,31 @@ export default function CheckoutPage() {
                 </p>
               </div>
             </div>
+
+            {/* Delivery promise badge */}
+            <div className="bg-green-50 border border-green-100 rounded-xl p-4 flex items-center gap-3">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-8 h-8 text-green-600 flex-shrink-0"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <div>
+                <p className="text-xs font-semibold text-green-800">24-Hour Delivery</p>
+                <p className="text-xs text-green-700 mt-0.5">
+                  Your order will be delivered within 24 hours of payment
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

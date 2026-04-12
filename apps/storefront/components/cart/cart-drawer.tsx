@@ -243,13 +243,19 @@ export function CartDrawer() {
                 <span>{formatPrice(subtotal)}</span>
               </div>
               <div className="flex justify-between text-onyx-500">
-                <span>Service Fee (1.95%)</span>
+                <span>Service Fee</span>
                 <span>{formatPrice(fee)}</span>
               </div>
               <div className="flex justify-between font-semibold text-onyx text-base pt-2 border-t border-onyx-100">
                 <span>Total</span>
                 <span>{formatPrice(total)}</span>
               </div>
+            </div>
+            <div className="flex items-center justify-center gap-1.5 text-xs text-green-700 bg-green-50 border border-green-100 rounded-lg py-2 px-3">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Order now — delivered within <strong>24 hours</strong></span>
             </div>
             <Link
               href="/checkout"

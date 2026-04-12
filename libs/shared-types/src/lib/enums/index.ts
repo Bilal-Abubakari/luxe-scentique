@@ -25,6 +25,7 @@ export enum ProductVibe {
   UNISEX = 'UNISEX',
   FEMININE = 'FEMININE',
   MASCULINE = 'MASCULINE',
+  LUXURY = 'LUXURY'
 }
 
 export enum Currency {

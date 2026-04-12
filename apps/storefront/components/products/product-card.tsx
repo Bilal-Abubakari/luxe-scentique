@@ -139,13 +139,6 @@ export function ProductCard({ product, className }: Readonly<ProductCardProps>) 
                 </span>
               )}
             </div>
-            <p
-              className="text-xs text-onyx-400 mt-0.5"
-              aria-label={`Total including service fee: ${formatPrice(totalWithFee)}`}
-            >
-              Total incl. fees:{' '}
-              <span className="font-medium text-onyx">{formatPrice(totalWithFee)}</span>
-            </p>
           </div>
 
           {/* Add to Cart Button */}

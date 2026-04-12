@@ -143,7 +143,8 @@ export function HeroSection() {
             {[
               { value: '500+', label: 'Fragrances' },
               { value: '100%', label: 'Authentic' },
-              { value: 'Free', label: 'Shipping over GHS 500' },
+              { value: '24h', label: 'Delivery' },
+              { value: 'Free', label: 'Shipping over GHS 1000' },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <p className="font-display text-2xl text-gold font-semibold">{stat.value}</p>
