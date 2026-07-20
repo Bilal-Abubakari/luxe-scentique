@@ -1,6 +1,6 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { DividerModule } from 'primeng/divider';
@@ -93,6 +93,31 @@ import { AuthService } from '../core/services/auth.service';
         margin: 1.5rem 0;
       }
 
+      .error-banner {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        background: rgba(220, 38, 38, 0.1);
+        border: 1px solid rgba(220, 38, 38, 0.3);
+        border-radius: 10px;
+        color: #fca5a5;
+
+        .pi {
+          font-size: 1.1rem;
+          color: #f87171;
+          margin-top: 0.1rem;
+          flex-shrink: 0;
+        }
+
+        p {
+          margin: 0;
+          font-size: 0.85rem;
+          line-height: 1.5;
+        }
+      }
+
       .login-heading {
         font-size: 1rem;
         color: var(--color-text-secondary);
@@ -161,14 +186,26 @@ import { AuthService } from '../core/services/auth.service';
 export class LoginComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
+  errorMessage = signal('');
 
   ngOnInit(): void {
-    if (this.authService.isAuthenticated()) {
+    if (this.authService.isAuthenticated() && this.authService.isAdmin()) {
       void this.router.navigate(['/dashboard']);
+      return;
+    }
+
+    const error = this.route.snapshot.queryParamMap.get('error');
+    if (error === 'unauthorized') {
+      this.errorMessage.set(
+        'Access denied. Your account is not authorized to access the admin panel. Please contact an administrator if you believe this is an error.'
+      );
     }
   }
 
   signInWithGoogle(): void {
+    this.errorMessage.set('');
     this.authService.login();
   }
 }
