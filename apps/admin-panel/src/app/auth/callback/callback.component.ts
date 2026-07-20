@@ -42,6 +42,16 @@ export class AuthCallbackComponent implements OnInit {
 
     if (token) {
       this.authService.setToken(token);
+
+      if (!this.authService.isAdmin()) {
+        this.authService.removeToken();
+        void this.router.navigate(['/login'], {
+          replaceUrl: true,
+          queryParams: { error: 'unauthorized' },
+        });
+        return;
+      }
+
       void this.router.navigate(['/dashboard'], { replaceUrl: true });
     } else {
       void this.router.navigate(['/login'], { replaceUrl: true });

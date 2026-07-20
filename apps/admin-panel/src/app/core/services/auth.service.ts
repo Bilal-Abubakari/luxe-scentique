@@ -28,14 +28,12 @@ export class AuthService {
     if (!token) return false;
 
     try {
-      // Decode JWT payload to check expiry
-      const parts = token.split('.');
-      if (parts.length !== 3) return false;
+      const payload = this.decodePayload(token);
+      if (!payload) return false;
 
-      const payload = JSON.parse(atob(parts[1]));
       const now = Math.floor(Date.now() / 1000);
-
-      if (payload['exp'] && payload['exp'] < now) {
+      const exp = payload['exp'] as number
+      if (exp < now) {
         this.removeToken();
         return false;
       }
@@ -44,6 +42,27 @@ export class AuthService {
     } catch {
       this.removeToken();
       return false;
+    }
+  }
+
+  isAdmin(): boolean {
+    const token = this.getToken();
+    if (!token) return false;
+
+    const payload = this.decodePayload(token);
+    if (!payload) return false;
+
+    const role = payload['role'];
+    return role === 'ADMIN' || role === 'SUPER_ADMIN';
+  }
+
+  private decodePayload(token: string): Record<string, unknown> | null {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return null;
+      return JSON.parse(atob(parts[1]));
+    } catch {
+      return null;
     }
   }
 
