@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBase: 'https://api.luxescentique.com/api/v1',
+  apiBase: 'https://api.luxescentiqueparfums.com/api/v1',
 };
