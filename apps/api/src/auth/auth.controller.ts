@@ -46,10 +46,10 @@ export class AuthController {
     const { accessToken } = this.authService.generateTokens(req.user);
 
     const isAdmin = req.user.role === Role.ADMIN || req.user.role === Role.SUPER_ADMIN;
-    const baseUrl = isAdmin
-      ? (this.configService.get<string>('adminUrl') ?? 'http://localhost:4201')
-      : (this.configService.get<string>('frontendUrl') ?? 'http://localhost:4200');
+    const adminUrl = this.configService.get<string>('adminUrl') ?? 'http://localhost:4201';
+    const frontendUrl = this.configService.get<string>('frontendUrl') ?? 'http://localhost:4200';
 
+    const baseUrl = isAdmin ? adminUrl : frontendUrl;
     res.redirect(`${baseUrl}/auth/callback?token=${accessToken}`);
   }
 

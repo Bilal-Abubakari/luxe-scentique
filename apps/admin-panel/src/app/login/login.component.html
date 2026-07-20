@@ -11,6 +11,13 @@
 
     <p-divider class="login-divider" />
 
+    @if (errorMessage()) {
+      <div class="error-banner" role="alert">
+        <span class="pi pi-exclamation-triangle" aria-hidden="true"></span>
+        <p>{{ errorMessage() }}</p>
+      </div>
+    }
+
     <p class="login-heading">Sign in to access the admin panel</p>
 
     <!-- Google Sign In Button -->
