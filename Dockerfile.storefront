@@ -1,0 +1,28 @@
+# ─── Stage 1: Install dependencies ───────────────────────────────────────────
+FROM node:24-alpine AS deps
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --ignore-scripts
+
+# ─── Stage 2: Build the Next.js storefront ───────────────────────────────────
+FROM node:24-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN npx nx build storefront --configuration=production
+
+# ─── Stage 3: Production runtime ─────────────────────────────────────────────
+FROM node:24-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Next.js standalone output copies only the needed files
+COPY --from=builder /app/dist/apps/storefront/.next/standalone ./
+COPY --from=builder /app/dist/apps/storefront/.next/static ./dist/apps/storefront/.next/static
+COPY --from=builder /app/dist/apps/storefront/public ./dist/apps/storefront/public
+
+EXPOSE 3000
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+CMD ["node", "dist/apps/storefront/server.js"]
