@@ -60,3 +60,5 @@ prisma/migrations/ # optional - you may want to commit migrations
 
 # Uploads
 uploads/
+
+.claude/
