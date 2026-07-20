@@ -3,6 +3,7 @@ const { composePlugins, withNx } = require('@nx/next');
 
 /** @type {import('@nx/next/plugins/with-nx').WithNxOptions} **/
 const nextConfig = {
+  output: 'standalone',
   nx: { svgr: false },
   images: {
     remotePatterns: [
